@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 
-import cmd, textwrap
+import cmd, textwrap, json
+
+def loadJsonFromFile(jsonFile):
+    fileName = "saved-game/" + jsonFile
+    with open(fileName, 'r') as f:
+        text = f.read()
+        return(json.loads(text))
 
 class ExampleCmd(cmd.Cmd):
 
@@ -78,9 +84,19 @@ class ExampleCmd(cmd.Cmd):
         """ use a git command """
         print("Using an awesome version control command")
 
+    def do_load(self,arg):
+        """ Load a file """
+        print("Command doesn't load a file yet")
+
+    def do_write(self,arg):
+        """ Write a file """
+        print("Commdand doesn't write a file yet")
+
 
 if __name__ == '__main__':
     print("Example")
     print("=======")
+    alive = loadJsonFromFile('alive.json')
+    print(repr(alive))
     ExampleCmd().cmdloop()
     print("Bye!")
