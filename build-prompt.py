@@ -74,6 +74,10 @@ class ExampleCmd(cmd.Cmd):
         print("Previous command incompete")
         print("Specify <arg>)")
 
+    def do_git(self,arg):
+        """ use a git command """
+        print("Using an awesome version control command")
+
 
 if __name__ == '__main__':
     print("Example")
