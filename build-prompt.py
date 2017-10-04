@@ -2,11 +2,34 @@
 
 import cmd, textwrap, json
 
-def loadJsonFromFile(jsonFile):
-    fileName = "saved-game/" + jsonFile
+game = { "player": None, "alive": None, "inventory": None, "rooms" : None, "characters": None}
+
+def loadJsonFromFile(game_json):
+    fileName = "saved-game/" + game_json + ".json" # Load Json
     with open(fileName, 'r') as f:
         text = f.read()
         return(json.loads(text))
+
+def writeJsonToFile(game_json):
+    fileName = "saved-game/" + game_json['file_name'] + ".json" # Write Json
+    with open(fileName, 'w') as f:
+        f.write(json.dumps(game_json, sort_keys=True,
+                          indent=4, separators=(',', ':')))
+        return "Json Written"
+
+def loadGameData(game):
+    for fileName in game:
+        f = fileName
+        game[f] = loadJsonFromFile(f)
+
+def writeGameData(game):
+    for fileName in game:
+        fi = fileName
+        saveGame = "saved-game/" + fi + ".json"
+        with open(saveGame, 'w') as f:
+            f.write(json.dumps(game[fi], sort_keys=True,
+                               indent=4, separators=(',',':')))
+            return "Game Written"
 
 class ExampleCmd(cmd.Cmd):
 
@@ -86,17 +109,28 @@ class ExampleCmd(cmd.Cmd):
 
     def do_load(self,arg):
         """ Load a file """
-        print("Command doesn't load a file yet")
+        print(loadJsonFromFile(arg))
 
     def do_write(self,arg):
         """ Write a file """
-        print("Commdand doesn't write a file yet")
+        print(writeGameData(game))
 
+    def do_vardump(self,arg):
+        """ give user ability to test loaded variables """
+        key = arg.lower()
+        print(repr(game[key]))
+
+    def do_kill(self,arg):
+        """ Command for killing things """
+        target = arg.lower()
+        if target == "yourself":
+            game['alive'] = "false"
+        print("You killed " + target)
 
 if __name__ == '__main__':
     print("Example")
     print("=======")
-    alive = loadJsonFromFile('alive.json')
-    print(repr(alive))
+
+    loadGameData(game)
     ExampleCmd().cmdloop()
     print("Bye!")
