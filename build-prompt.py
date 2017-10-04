@@ -92,11 +92,11 @@ class ExampleCmd(cmd.Cmd):
 
     def do_shoot(self, arg):
         """ launch a projectile at a target """
-        print(arg.split(" ")
+        print(arg.split(" "))
 
     def do_give(self, arg):
         """ launch a projectile """
-        print(arg.split(" ")
+        print(arg.split(" "))
 
     def do_complete(self,arg):
         """ finish an interrupted command """
