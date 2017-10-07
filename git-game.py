@@ -4,18 +4,113 @@ import cmd, textwrap, json
 
 game = { "player": None, "alive": None, "inventory": None, "rooms" : None, "characters": None}
 
+DESC = 'desc'
+NORTH = 'north'
+SOUTH = 'south'
+EAST = 'east'
+WEST = 'west'
+UP = 'up'
+DOWN = 'down'
+GROUND = 'ground'
+SHOP = 'shop'
+GROUNDDESC = 'grounddesc'
+SHORTDESC = 'shortdesc'
+LONGDESC = 'longdesc'
+TAKEABLE = 'takeable'
+EDIBLE = 'edible'
+DESCWORDS = 'descwords'
+
+SCREEN_WIDTH = 80
+
+worldRooms = {
+    'Abandoned Treasury': {
+    DESC: 'An Abandoned Treasury Lies Before You. The room glitters and is full of treasure chests. Something smells of smoke',
+    EAST: 'Dragon\'s Lair',
+    SOUTH: 'Alchemist Lab',
+    GROUND: ['Charcoal', 'Treasure Chest Key']},
+
+    'Alchemist Lab': {
+    DESC: 'You see the Liquids and Vial\'s of an Alchemist Lab. A friendly Alchemist awaits, perhaps ready to do business',
+    NORTH: 'Abadoned Treasury',
+    WEST: 'Bottomless Pit',
+    EAST: 'Stalagmite Central',
+    SOUTH: 'Git Crystal',
+    GROUND: ['Git Checkout Tutorial']},
+
+    'Armory': {
+    DESC: 'You see the armory. Swords, Spears, Polearms, Chainmail, and other items lay bent and burnt. There might still be something in working condition somewhere',
+    NORTH: 'Mine Entrance',
+    GROUND: ['Shield']},
+
+    'Bottomless Pit': {
+    DESC: 'Before you lies a hole from which no light escapes',
+    WEST: 'Bottomless Pit',
+    EAST: 'Alchemist Lab',
+    GROUND: ['Dungeon Map']},
+
+    'Dragon\'s Lair': {
+    DESC: 'The following room contains enough gold to rule ten kingdoms. The dragon protecting it has not killed you yet. Perhaps it is sleeping',
+    WEST: 'Abandoned Treasury',
+    SOUTH: 'Stalagmite Central',
+    GROUND: ['Sword','Crown']
+    },
+
+    'Git Crystal': {
+    DESC: 'A large, skyblue crystal is in the center of a perfectly spherical room. The crystal looks like ones you\'ve seen in your grandfather\'s Workshop',
+    NORTH: 'Stalagmite Central',
+    EAST: 'Mine Entrance',
+    SOUTH: 'Mountain Gate',
+    WEST: 'Wizard\'s Library',
+    GROUND: ['Intro Git Tutorial', 'Git Status Tutorial']},
+
+    'Impressive Caverns': {
+    DESC: 'Before you lies a large and winding maze of passageways. Is something lurking in here? You could get lost trying to find it',
+    EAST: 'Wizard\'s Library',
+    GROUND: []},
+
+    'Mine Entrance': {
+    DESC: 'You see an expansive tunnel. A sign reads \'Dig Ore Get Out. With puns like this, it\'s no wonder it\'s abandoned.',
+    EAST: 'Mines',
+    SOUTH: 'Armory',
+    WEST: 'Git Crystal',
+    GROUND: ['Git Branch Tutorial','Git Merge Tutorial']},
+
+    'Mines': {
+    DESC: 'A labyrinth of passageways and abandoned mine equipment in good condition confront you',
+    WEST: 'Mine Entrace',
+    GROUND: []},
+
+    'Mountain Gate': {
+    DESC: 'A sign reads: No Trespassing. Beware of Dragon',
+    NORTH: 'Git Crystal',
+    GROUND: ['No Trepassing Sign']
+    },
+
+    'Stalagmite Central': {
+    DESC: 'Rocks rise from the floor in every part of this room. This is the place to be, if rocks are your best friend',
+    NORTH: 'Dragon\'s Lair',
+    SOUTH: 'Git Crystal',
+    WEST: 'Alchemist Lab',
+    GROUND: ['Stalagmite', 'Stalagmite']
+    },
+
+    'Wizard\'s Library': {
+    DESC: 'A musty odor fills the air from the books, books, and more books that fill this old wizard\'s study. Maybe there\'s a tutorial?',
+    NORTH: 'Alchemist Lab',
+    EAST: 'Git Crystal',
+    WEST: 'Impressive Caverns',
+    GROUND: ['Git Diff Tutorial, Git Commit Tutorial']
+    }
+}
+
+currentRoom = 'Mountain Gate'
+showFullExits = True
+
 def loadJsonFromFile(game_json):
     fileName = "saved-game/" + game_json + ".json" # Load Json
     with open(fileName, 'r') as f:
         text = f.read()
         return(json.loads(text))
-
-def writeJsonToFile(game_json):
-    fileName = "saved-game/" + game_json['file_name'] + ".json" # Write Json
-    with open(fileName, 'w') as f:
-        f.write(json.dumps(game_json, sort_keys=True,
-                          indent=4, separators=(',', ':')))
-        return "Json Written"
 
 def loadGameData(game):
     for fileName in game:
@@ -31,6 +126,38 @@ def writeGameData(game):
                                indent=4, separators=(',',':')))
             return "Game Written"
 
+def displayLocation(location):
+    """A helper function for displaying an area's description and exits."""
+    # Print the room name.
+    print(location)
+    print('=' * len(location))
+
+    # Print the room's description (using textwrap.wrap())
+    print('\n'.join(textwrap.wrap(worldRooms[location][DESC], SCREEN_WIDTH)))
+
+    # Print all the exits.
+    exits = []
+    for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
+        if direction in worldRooms[location].keys():
+            exits.append(direction.title())
+            print()
+    if showFullExits:
+        for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
+            if direction in worldRooms[location]:
+                print('%s: %s' % (direction.title(), worldRooms[location][direction]))
+
+def moveDirection(direction):
+    """A helper function that changes the location of the player."""
+    global currentRoom
+
+    if direction in worldRooms[currentRoom]:
+        print("Moving to... %s" % direction)
+        currentRoom = worldRooms[currentRoom][direction]
+        displayLocation(currentRoom)
+        print(repr(worldRooms[currentRoom]))
+    else:
+        print('You cannot move in that direction')
+
 class ExampleCmd(cmd.Cmd):
 
     prompt = '\n\033[033m *>\033[0m '
@@ -44,27 +171,27 @@ class ExampleCmd(cmd.Cmd):
 
     def do_north(self, arg):
         """ head north if possible """
-        print("Going North")
+        moveDirection('north')
 
     def do_south(self, arg):
         """ head south if possible """
-        print("Going South")
+        moveDirection('south')
 
     def do_east(self, arg):
         """ head east if possible """
-        print("Going East")
+        moveDirection('east')
 
     def do_west(self, arg):
         """ head west if possible """
-        print("Going West")
+        moveDirection('west')
 
     def do_up(self, arg):
         """ go up if possible """
-        print("Going West")
+        moveDirection('up')
 
     def do_down(self, arg):
         """ go down if possible """
-        print("Going West")
+        moveDirection('down')
 
     def do_talk(self, arg):
         """ Command usage: talk person """
@@ -132,5 +259,6 @@ if __name__ == '__main__':
     print("=======")
 
     loadGameData(game)
+    displayLocation(currentRoom)
     ExampleCmd().cmdloop()
     print("Bye!")
