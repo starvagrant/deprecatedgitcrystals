@@ -2,7 +2,7 @@
 
 import cmd, textwrap, json
 
-game = { "player": None, "alive": None, "inventory": None, "rooms" : None, "characters": None}
+game = { "player": None, "alive": True, "inventory": None, "rooms" : None, "characters": None}
 
 DESC = 'desc'
 NORTH = 'north'
@@ -19,6 +19,7 @@ LONGDESC = 'longdesc'
 TAKEABLE = 'takeable'
 EDIBLE = 'edible'
 DESCWORDS = 'descwords'
+DANGER = 'danger'
 
 SCREEN_WIDTH = 80
 
@@ -27,7 +28,8 @@ worldRooms = {
     DESC: 'An Abandoned Treasury Lies Before You. The room glitters and is full of treasure chests. Something smells of smoke',
     EAST: 'Dragon\'s Lair',
     SOUTH: 'Alchemist Lab',
-    GROUND: ['Charcoal', 'Treasure Chest Key']},
+    GROUND: ['Charcoal', 'Treasure Chest Key'],
+    DANGER: ['Search']},
 
     'Alchemist Lab': {
     DESC: 'You see the Liquids and Vial\'s of an Alchemist Lab. A friendly Alchemist awaits, perhaps ready to do business',
@@ -46,13 +48,15 @@ worldRooms = {
     DESC: 'Before you lies a hole from which no light escapes',
     WEST: 'Bottomless Pit',
     EAST: 'Alchemist Lab',
-    GROUND: ['Dungeon Map']},
+    GROUND: ['Dungeon Map'],
+    DANGER: ['Entry']},
 
     'Dragon\'s Lair': {
     DESC: 'The following room contains enough gold to rule ten kingdoms. The dragon protecting it has not killed you yet. Perhaps it is sleeping',
     WEST: 'Abandoned Treasury',
     SOUTH: 'Stalagmite Central',
-    GROUND: ['Sword','Crown']
+    GROUND: ['Sword','Crown'],
+    DANGER: ['Noise']
     },
 
     'Git Crystal': {
@@ -66,19 +70,20 @@ worldRooms = {
     'Impressive Caverns': {
     DESC: 'Before you lies a large and winding maze of passageways. Is something lurking in here? You could get lost trying to find it',
     EAST: 'Wizard\'s Library',
-    GROUND: []},
+    GROUND: ['Skeleton Key']},
 
     'Mine Entrance': {
     DESC: 'You see an expansive tunnel. A sign reads \'Dig Ore Get Out. With puns like this, it\'s no wonder it\'s abandoned.',
     EAST: 'Mines',
     SOUTH: 'Armory',
     WEST: 'Git Crystal',
-    GROUND: ['Git Branch Tutorial','Git Merge Tutorial']},
+    GROUND: ['Git Branch Tutorial','Git Merge Tutorial', 'Toolkit']},
 
     'Mines': {
     DESC: 'A labyrinth of passageways and abandoned mine equipment in good condition confront you',
     WEST: 'Mine Entrace',
-    GROUND: []},
+    GROUND: ['Saltpeter'],
+    DANGER: ['Search']},
 
     'Mountain Gate': {
     DESC: 'A sign reads: No Trespassing. Beware of Dragon',
@@ -149,18 +154,30 @@ def displayLocation(location):
 def moveDirection(direction):
     """A helper function that changes the location of the player."""
     global currentRoom
+    global game
 
     if direction in worldRooms[currentRoom]:
         print("Moving to... %s" % direction)
         currentRoom = worldRooms[currentRoom][direction]
         displayLocation(currentRoom)
+        if DANGER in worldRooms[currentRoom].keys() and 'Entry' in worldRooms[currentRoom][DANGER]:
+            game['alive'] = False
+            report_death()
+            return
         print(repr(worldRooms[currentRoom]))
     else:
         print('You cannot move in that direction')
 
+def report_death():
+   print()
+   print(SCREEN_RED + 'You are dead \n')
+   print(SCREEN_GREEN + 'Commit your progress or restart')
+   print(SCREEN_CYAN + 'Type help git for tutorial' + SCREEN_WHITE + '\n')
+
 class ExampleCmd(cmd.Cmd):
 
     prompt = '\n\033[033m *>\033[0m '
+    global game
 
     def default(self, arg):
         print('I do not understand that command. Type "help" for a list of commands.')
@@ -171,26 +188,44 @@ class ExampleCmd(cmd.Cmd):
 
     def do_north(self, arg):
         """ head north if possible """
+        if not(game['alive']):
+            report_death()
+            return
         moveDirection('north')
 
     def do_south(self, arg):
         """ head south if possible """
+        if not(game['alive']):
+            report_death()
+            return
         moveDirection('south')
 
     def do_east(self, arg):
         """ head east if possible """
+        if not(game['alive']):
+            report_death()
+            return
         moveDirection('east')
 
     def do_west(self, arg):
         """ head west if possible """
+        if not(game['alive']):
+            report_death()
+            return
         moveDirection('west')
 
     def do_up(self, arg):
         """ go up if possible """
+        if not(game['alive']):
+            report_death()
+            return
         moveDirection('up')
 
     def do_down(self, arg):
         """ go down if possible """
+        if (not game['alive']):
+            report_death()
+            return
         moveDirection('down')
 
     def do_talk(self, arg):
@@ -251,7 +286,7 @@ class ExampleCmd(cmd.Cmd):
         """ Command for killing things """
         target = arg.lower()
         if target == "yourself":
-            game['alive'] = "false"
+            game['alive'] = "False"
         print("You killed " + target)
 
 if __name__ == '__main__':
