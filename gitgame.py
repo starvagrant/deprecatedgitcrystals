@@ -2,8 +2,6 @@
 
 import cmd, textwrap, json, os
 
-game = { "player": None, "alive": True, "inventory": None, "rooms" : None, "characters": None}
-
 DESC = 'desc'
 NORTH = 'north'
 SOUTH = 'south'
@@ -147,33 +145,33 @@ def displayLocation(location):
     print('=' * len(location))
 
     # Print the room's description (using textwrap.wrap())
-    print('\n'.join(textwrap.wrap(worldRooms[location][DESC], SCREEN_WIDTH)))
+    print('\n'.join(textwrap.wrap(game['worldRooms'][location][DESC], SCREEN_WIDTH)))
 
     # Print all the exits.
     exits = []
     for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-        if direction in worldRooms[location].keys():
+        if direction in game['worldRooms'][location].keys():
             exits.append(direction.title())
             print()
     if showFullExits:
         for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-            if direction in worldRooms[location]:
-                print('%s: %s' % (direction.title(), worldRooms[location][direction]))
+            if direction in game['worldRooms'][location]:
+                print('%s: %s' % (direction.title(), game['worldRooms'][location][direction]))
 
 def moveDirection(direction):
     """A helper function that changes the location of the player."""
     global currentRoom
     global game
 
-    if direction in worldRooms[currentRoom]:
+    if direction in game['worldRooms'][currentRoom]:
         print("Moving to... %s" % direction)
-        currentRoom = worldRooms[currentRoom][direction]
+        currentRoom = game['worldRooms'][currentRoom][direction]
         displayLocation(currentRoom)
-        if DANGER in worldRooms[currentRoom].keys() and 'Entry' in worldRooms[currentRoom][DANGER]:
+        if DANGER in game['worldRooms'][currentRoom].keys() and 'Entry' in game['worldRooms'][currentRoom][DANGER]:
             game['alive'] = False
             report_death()
             return
-        print(repr(worldRooms[currentRoom]))
+        print(repr(game['worldRooms'][currentRoom]))
     else:
         print('You cannot move in that direction')
 
