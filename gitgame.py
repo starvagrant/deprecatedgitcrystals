@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import cmd, textwrap, json
+import cmd, textwrap, json, os
 
 game = { "player": None, "alive": True, "inventory": None, "rooms" : None, "characters": None}
 
@@ -31,7 +31,8 @@ SCREEN_BLUE = "\033[34m"
 SCREEN_PURPLE = "\033[35m"
 SCREEN_WHITE = "\033[0m"
 
-worldRooms = {
+game = {}
+game['worldRooms'] = {
     'Abandoned Treasury': {
     DESC: 'An Abandoned Treasury Lies Before You. The room glitters and is full of treasure chests. Something smells of smoke',
     EAST: 'Dragon\'s Lair',
