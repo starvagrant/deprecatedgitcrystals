@@ -30,6 +30,7 @@ SCREEN_PURPLE = "\033[35m"
 SCREEN_WHITE = "\033[0m"
 
 game = {}
+game['alive'] = True
 game['worldRooms'] = {
     'Abandoned Treasury': {
     DESC: 'An Abandoned Treasury Lies Before You. The room glitters and is full of treasure chests. Something smells of smoke',
@@ -118,25 +119,28 @@ game['worldRooms'] = {
 currentRoom = 'Mountain Gate'
 showFullExits = True
 
-def loadJsonFromFile(game_json):
-    fileName = "saved-game/" + game_json + ".json" # Load Json
+def loadJsonFromFile(game_json, fileDir = "saved-game"):
+    """ Load a single json file """
+    fileName = fileDir + "/" + game_json + ".json" # Load Json
     with open(fileName, 'r') as f:
         text = f.read()
         return(json.loads(text))
 
-def loadGameData(game):
-    for fileName in game:
-        f = fileName
-        game[f] = loadJsonFromFile(f)
+def loadGameData(game_dir = "saved-game"):
+    """ load all files in a directory. All files most be json and have a .json extension """
+    for directory in os.walk(game_dir):
+        for fileName in directory[2]:        # the file name list
+            f = fileName[:-5]                # cut .json extension
+            game[f] = loadJsonFromFile(f, game_dir)
 
-def writeGameData(game):
-    for fileName in game:
-        fi = fileName
-        saveGame = "saved-game/" + fi + ".json"
-        with open(saveGame, 'w') as f:
-            f.write(json.dumps(game[fi], sort_keys=True,
-                               indent=4, separators=(',',':')))
-            return "Game Written"
+    return game
+
+def writeGameData(game, fileDir = "saved-game"):
+    saveGame = fileDir + "/" + "game.json"
+    with open(saveGame, 'w') as f:
+        f.write(json.dumps(game, sort_keys=True,
+                           indent=4, separators=(',',':')))
+        return True
 
 def displayLocation(location):
     """A helper function for displaying an area's description and exits."""
@@ -300,7 +304,7 @@ if __name__ == '__main__':
     print("Example")
     print("=======")
 
-    loadGameData(game)
+#    loadGameData()
     displayLocation(currentRoom)
     ExampleCmd().cmdloop()
     print("Bye!")
