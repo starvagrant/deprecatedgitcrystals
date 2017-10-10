@@ -41,9 +41,10 @@ def loadJsonFromFile(game_json, fileDir = "saved-game"):
 def loadGameData(game_dir = "saved-game"):
     """ load all files in a directory. All files most be json and have a .json extension """
     for directory in os.walk(game_dir):
-        for fileName in directory[2]:        # the file name list
-            f = fileName[:-5]                # cut .json extension
-            game[f] = loadJsonFromFile(f, game_dir)
+        for fileName in directory[2]:               # the file name list
+            if (fileName[-5:] == '.json'):          # load .json files explicitly
+                f = fileName[:-5]                   # cut .json extension
+                game[f] = loadJsonFromFile(f, game_dir)
 
     return game
 
