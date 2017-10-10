@@ -11,11 +11,13 @@ class MyTests(unittest.TestCase):
         self.assertEqual(json['player'] , 'alive')
 
     def test_game(self):
+        """ Load Directory of Mock Data"""
         test = (gitgame.loadGameData('mock-data/'))
         self.assertEqual(test['test']['filename'], 'alive')
         self.assertEqual(test['test2']['filename'], 'alive')
 
     def test_write_game(self):
+        """ Test games are being property written """
         game = (gitgame.loadGameData('mock-data/'))
         save = (gitgame.writeGameData(game,'mock-data'))
         files = game.keys()
