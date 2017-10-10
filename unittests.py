@@ -31,5 +31,15 @@ class MyTests(unittest.TestCase):
                                                                         # The Json Files in Mock-Data
         self.assertEqual(game.keys(), save)                             # writeGameData returns game.keys()
 
+    def test_death(self):
+        prompt = gitgame.ExampleCmd()
+        prompt.do_load()
+        prompt.do_north('north')
+        prompt.do_north('north')
+        prompt.do_west('west')
+        prompt.do_west('west')                                                # Navigate to Bottomless Pit, Character is Dead
+        game = prompt.get_game()
+        print(game['alive'])
+        self.assertFalse(game['alive'])
 
 unittest.main()
