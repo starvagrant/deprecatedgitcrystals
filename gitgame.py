@@ -283,9 +283,9 @@ class ExampleCmd(cmd.Cmd):
         """ use a git command """
         print("Using an awesome version control command")
 
-    def do_load(self,arg):
+    def do_load(self,arg = 'saved-game'):
         """ Load a file """
-        print(loadJsonFromFile(arg))
+        game = loadGameData()
 
     def do_write(self,arg):
         """ Write a file """
@@ -303,11 +303,17 @@ class ExampleCmd(cmd.Cmd):
             game['alive'] = "False"
         print("You killed " + target)
 
+    def do_guts(self,arg):
+        print(repr(game))
+
+    def get_game(self):
+        return game
+
 if __name__ == '__main__':
     print("Example")
     print("=======")
 
-#    loadGameData()
+    game = loadGameData()
     displayLocation(currentRoom)
     ExampleCmd().cmdloop()
     print("Bye!")
