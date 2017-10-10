@@ -18,7 +18,18 @@ class MyTests(unittest.TestCase):
     def test_write_game(self):
         game = (gitgame.loadGameData('mock-data/'))
         save = (gitgame.writeGameData(game,'mock-data'))
-        self.assertEqual(save, True)
+        files = game.keys()
+        test = []
+
+        for item in files:
+            test.append(item)
+
+        test.sort()
+
+
+        self.assertEqual(test, ['alive', 'characters', 'game', 'inventory', 'player', 'rooms', 'test', 'test2', 'worldRooms'])
+                                                                        # The Json Files in Mock-Data
+        self.assertEqual(game.keys(), save)                             # writeGameData returns game.keys()
 
 
 unittest.main()
