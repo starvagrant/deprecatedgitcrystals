@@ -30,94 +30,6 @@ SCREEN_PURPLE = "\033[35m"
 SCREEN_WHITE = "\033[0m"
 
 game = {}
-game['alive'] = True
-game['worldRooms'] = {
-    'Abandoned Treasury': {
-    DESC: 'An Abandoned Treasury Lies Before You. The room glitters and is full of treasure chests. Something smells of smoke',
-    EAST: 'Dragon\'s Lair',
-    SOUTH: 'Alchemist Lab',
-    GROUND: ['Charcoal', 'Treasure Chest Key'],
-    DANGER: ['Search']},
-
-    'Alchemist Lab': {
-    DESC: 'You see the Liquids and Vial\'s of an Alchemist Lab. A friendly Alchemist awaits, perhaps ready to do business',
-    NORTH: 'Abadoned Treasury',
-    WEST: 'Bottomless Pit',
-    EAST: 'Stalagmite Central',
-    SOUTH: 'Git Crystal',
-    GROUND: ['Git Checkout Tutorial']},
-
-    'Armory': {
-    DESC: 'You see the armory. Swords, Spears, Polearms, Chainmail, and other items lay bent and burnt. There might still be something in working condition somewhere',
-    NORTH: 'Mine Entrance',
-    GROUND: ['Shield']},
-
-    'Bottomless Pit': {
-    DESC: 'Before you lies a hole from which no light escapes',
-    WEST: 'Bottomless Pit',
-    EAST: 'Alchemist Lab',
-    GROUND: ['Dungeon Map'],
-    DANGER: ['Entry']},
-
-    'Dragon\'s Lair': {
-    DESC: 'The following room contains enough gold to rule ten kingdoms. The dragon protecting it has not killed you yet. Perhaps it is sleeping',
-    WEST: 'Abandoned Treasury',
-    SOUTH: 'Stalagmite Central',
-    GROUND: ['Sword','Crown'],
-    DANGER: ['Noise']
-    },
-
-    'Git Crystal': {
-    DESC: 'A large, skyblue crystal is in the center of a perfectly spherical room. The crystal looks like ones you\'ve seen in your grandfather\'s Workshop',
-    NORTH: 'Stalagmite Central',
-    EAST: 'Mine Entrance',
-    SOUTH: 'Mountain Gate',
-    WEST: 'Wizard\'s Library',
-    GROUND: ['Intro Git Tutorial', 'Git Status Tutorial']},
-
-    'Impressive Caverns': {
-    DESC: 'Before you lies a large and winding maze of passageways. Is something lurking in here? You could get lost trying to find it',
-    EAST: 'Wizard\'s Library',
-    GROUND: ['Skeleton Key']},
-
-    'Mine Entrance': {
-    DESC: 'You see an expansive tunnel. A sign reads \'Dig Ore Get Out. With puns like this, it\'s no wonder it\'s abandoned.',
-    EAST: 'Mines',
-    SOUTH: 'Armory',
-    WEST: 'Git Crystal',
-    GROUND: ['Git Branch Tutorial','Git Merge Tutorial', 'Toolkit']},
-
-    'Mines': {
-    DESC: 'A labyrinth of passageways and abandoned mine equipment in good condition confront you',
-    WEST: 'Mine Entrace',
-    GROUND: ['Saltpeter'],
-    DANGER: ['Search']},
-
-    'Mountain Gate': {
-    DESC: 'A sign reads: No Trespassing. Beware of Dragon',
-    NORTH: 'Git Crystal',
-    GROUND: ['No Trepassing Sign']
-    },
-
-    'Stalagmite Central': {
-    DESC: 'Rocks rise from the floor in every part of this room. This is the place to be, if rocks are your best friend',
-    NORTH: 'Dragon\'s Lair',
-    SOUTH: 'Git Crystal',
-    WEST: 'Alchemist Lab',
-    GROUND: ['Stalagmite', 'Stalagmite']
-    },
-
-    'Wizard\'s Library': {
-    DESC: 'A musty odor fills the air from the books, books, and more books that fill this old wizard\'s study. Maybe there\'s a tutorial?',
-    NORTH: 'Alchemist Lab',
-    EAST: 'Git Crystal',
-    WEST: 'Impressive Caverns',
-    GROUND: ['Git Diff Tutorial, Git Commit Tutorial']
-    }
-}
-
-currentRoom = 'Mountain Gate'
-showFullExits = True
 
 def loadJsonFromFile(game_json, fileDir = "saved-game"):
     """ Load a single json file """
@@ -152,33 +64,34 @@ def displayLocation(location):
     print('=' * len(location))
 
     # Print the room's description (using textwrap.wrap())
-    print('\n'.join(textwrap.wrap(game['worldRooms'][location][DESC], SCREEN_WIDTH)))
-
+#    print('\n'.join(textwrap.wrap(game['rooms'][location][DESC], SCREEN_WIDTH)))
     # Print all the exits.
     exits = []
     for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-        if direction in game['worldRooms'][location].keys():
+        if direction in game['rooms'][location].keys():
             exits.append(direction.title())
             print()
-    if showFullExits:
-        for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
-            if direction in game['worldRooms'][location]:
-                print('%s: %s' % (direction.title(), game['worldRooms'][location][direction]))
+    for direction in (NORTH, SOUTH, EAST, WEST, UP, DOWN):
+        if direction in game['rooms'][location]:
+            print('%s: %s' % (direction.title(), game['rooms'][location][direction]))
 
 def moveDirection(direction):
     """A helper function that changes the location of the player."""
-    global currentRoom
     global game
 
-    if direction in game['worldRooms'][currentRoom]:
+    location = game['temp']['location']
+
+    if direction in game['rooms'][location]:
         print("Moving to... %s" % direction)
-        currentRoom = game['worldRooms'][currentRoom][direction]
-        displayLocation(currentRoom)
-        if DANGER in game['worldRooms'][currentRoom].keys() and 'Entry' in game['worldRooms'][currentRoom][DANGER]:
-            game['alive'] = False
-            report_death()
-            return
-        print(repr(game['worldRooms'][currentRoom]))
+        game['temp']['location'] = game['rooms'][location][direction]
+
+        displayLocation(game['temp']['location'])
+
+        if location in game['rooms']:
+            if 'danger' in game['rooms'][location].keys() and 'Entry' in game['rooms'][location]['danger']:
+                game['alive'] = False
+                report_death()
+                return
     else:
         print('You cannot move in that direction')
 
@@ -314,6 +227,6 @@ if __name__ == '__main__':
     print("=======")
 
     game = loadGameData()
-    displayLocation(currentRoom)
+    displayLocation(game['temp']['location'])
     ExampleCmd().cmdloop()
     print("Bye!")
