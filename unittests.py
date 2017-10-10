@@ -27,9 +27,7 @@ class MyTests(unittest.TestCase):
             test.append(item)
 
         test.sort()
-
-
-        self.assertEqual(test, ['alive', 'characters', 'game', 'inventory', 'player', 'rooms', 'test', 'test2', 'worldRooms'])
+        self.assertEqual(test, ['alive', 'characters', 'game', 'inventory', 'player', 'rooms', 'temp', 'test', 'test2', 'worldRooms'])
                                                                         # The Json Files in Mock-Data
         self.assertEqual(game.keys(), save)                             # writeGameData returns game.keys()
 
