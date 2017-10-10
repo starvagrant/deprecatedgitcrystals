@@ -136,11 +136,14 @@ def loadGameData(game_dir = "saved-game"):
     return game
 
 def writeGameData(game, fileDir = "saved-game"):
-    saveGame = fileDir + "/" + "game.json"
-    with open(saveGame, 'w') as f:
-        f.write(json.dumps(game, sort_keys=True,
-                           indent=4, separators=(',',':')))
-        return True
+    for saveData in game:
+        saveGame = fileDir + "/" + saveData + '.json'
+        with open(saveGame, 'w') as f:
+            f.write(json.dumps(game[saveData], sort_keys=True,
+                               indent=4, separators=(',',':')))
+            f.close()
+
+    return game.keys()
 
 def displayLocation(location):
     """A helper function for displaying an area's description and exits."""
