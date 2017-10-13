@@ -1,4 +1,14 @@
 {
-    "filename":"alive",
-    "player":"alive"
+    "weapons": [
+        "Unarmed"
+    ],
+    "gems": [
+        "Git Gem"
+    ],
+    "items": [
+        "Distress Note"
+    ],
+    "armor": [
+        "Basic Clothes"
+    ]
 }
