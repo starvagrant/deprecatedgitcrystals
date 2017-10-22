@@ -16,15 +16,15 @@ class MyTests(unittest.TestCase): #19 25 35 65 49
         self.assertEqual(testJson['b'], "b")
     def test_load_json(self):
         """ test loading a json file via BaseController """
-        base = BaseController()                             # test fails without saved-game/base.json
-        base.loadJsonFile('mock-data/base.json')
+        base = BaseController('mock-data', 'base')
+        base.loadJsonFile()
         self.assertEqual(base.data['first'], "first")
         self.assertEqual(base.data['second'], "second")
     def test_write_json(self):
         """ test writing a json file via BaseController """
-        base = BaseController()                             # test fails without saved-game/base.json
-        base.loadJsonFile('mock-data/base.json')
-        base.writeJsonFile('mock-data')
+        base = BaseController('mock-data', 'base')
+        base.loadJsonFile()
+        base.writeJsonFile()
         with open('mock-data/base.json', 'r') as f:
             text = f.read()
             testJson = json.loads(text)
@@ -43,15 +43,15 @@ class MyTests(unittest.TestCase): #19 25 35 65 49
                                                             # Mock Data Directory
 
     def test_game_controller(self):
-        factory = ControllerFactory()
+        factory = ControllerFactory(True)
         jsonFileList = factory.scanDir('mock-data')
 
         testFactory = factory.createController(jsonFileList[1])             # jsonFileList item should = 'base'
-        self.assertEqual(testFactory.data, BaseController().data)           # Python can't compare two objects,
-                                                                            # except by reference
+        self.assertEqual(testFactory.data, BaseController('mock-data', 'base').data) # Python can't compare two objects,
+                                                                                     # except by reference
 
     def test_game_init(self):
-        factory = ControllerFactory()
+        factory = ControllerFactory(True)
         files = factory.scanDir('mock-data')
         game = factory.initGame('mock-data')
         self.assertIsInstance(game, dict)                   # test variables are of right type
@@ -61,10 +61,8 @@ class MyTests(unittest.TestCase): #19 25 35 65 49
             self.assertIsInstance(game[data], BaseController)
 
     def test_game_controllers(self):
-        factory = ControllerFactory()
+        factory = ControllerFactory(True)
         controllers = factory.initGame('mock-data')         # test fails without saved-game/base.json
-        for name in controllers:
-            pprint(name)
 
         game = gitgame.ExampleCmd()
         game.loadControllers(controllers)
