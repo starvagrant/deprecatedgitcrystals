@@ -1,4 +1,26 @@
 {
-    "filename": "alive",
-    "player" : "alive"
+    "princess": {
+        "asleep": true,
+        "in_love": false,
+        "alive": true,
+        "captured": true
+    },
+    "grandfather": {
+        "asleep": false,
+        "in_love": false,
+        "alive": true,
+        "captured": true
+    },
+    "dragon": {
+        "asleep": true,
+        "in_love": false,
+        "alive": true,
+        "captured": false
+    },
+    "alchemist": {
+        "asleep": false,
+        "in_love": false,
+        "alive": true,
+        "captured": false
+    }
 }
