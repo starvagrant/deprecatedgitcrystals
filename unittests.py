@@ -72,7 +72,7 @@ class MyTests(unittest.TestCase):
         self.assertEqual(game.alive.data['alive'], True)
         self.assertEqual(game.inventory.data['weapons'][0], "Unarmed")
         self.assertEqual(game.characters.data['dragon']['asleep'], True)
-        self.assertEqual(game.temp.data['location'], "Mountain Cave")
+        self.assertEqual(game.temp.data['location'], "Mountain Gate")
         self.assertEqual(game.worldRooms.data['Abandoned Treasury']['danger'][0], "Search")
 
     def test_north_south_east_west(self):
@@ -86,7 +86,7 @@ class MyTests(unittest.TestCase):
         game.do_east()
         game.do_south()
 
-        self.assertEqual(game.temp.data['location'], "Mountain Cave")
+        self.assertEqual(game.temp.data['location'], "Mountain Gate")
 
     def test_death_upon_entry(self):                                        # NNWW leads to the bottomless pit
         """ Test to See if Deadly Rooms Kill Character """
