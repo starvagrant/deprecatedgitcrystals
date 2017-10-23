@@ -13,6 +13,7 @@ SCREEN_GREEN = "\033[32m"
 SCREEN_BLUE = "\033[34m"
 SCREEN_PURPLE = "\033[35m"
 SCREEN_WHITE = "\033[0m"
+DEATH_MESSAGE = "***You Are Dead. Commit Your Progress. Type help git for further details.\n"
 T = "| "
 U = "    "
 
@@ -31,7 +32,16 @@ class ExampleCmd(cmd.Cmd):
         self.inventory = controllers['inventory']
         self.characters = controllers['characters']
 
+    def checkDeath(self):
+        if self.alive.data['alive'] == True:
+            return False
+        else:
+            return True
+
     def describeLocation(self):
+        if self.checkDeath():
+            return textwrap.fill(SCREEN_RED + DEATH_MESSAGE +SCREEN_WHITE, SCREEN_WIDTH)
+
         location = self.temp.data['location']
         description = SCREEN_CYAN + '\n' + T + location + '\n\n' + SCREEN_WHITE                         # Location Name
         description += U + textwrap.fill(self.worldRooms.data[location]['desc'], SCREEN_WIDTH) + '\n\n' # Location Description
@@ -46,10 +56,17 @@ class ExampleCmd(cmd.Cmd):
         if not direction:
             return False
 
+        if self.checkDeath():
+            return textwrap.fill(SCREEN_RED + DEATH_MESSAGE +SCREEN_WHITE, SCREEN_WIDTH)
+
         location = self.temp.data['location']
         if location in self.worldRooms.data.keys():
             if direction in self.worldRooms.data[location]:
                 self.temp.data['location'] = self.worldRooms.data[location][direction]
+                location = self.temp.data['location']
+                if 'danger' in self.worldRooms.data[location]:
+                    if "Entry" in self.worldRooms.data[location]['danger']:
+                        self.alive.data['alive'] = False
                 return self.temp.data['location']
             else:
                 return False
@@ -61,28 +78,40 @@ class ExampleCmd(cmd.Cmd):
         print(self.describeLocation())
 
     def do_north(self, args):
-        if not (self.changeLocation('north')):
-            print(SCREEN_RED + "You cannot go north" + SCREEN_WHITE)
+        if self.checkDeath():
+            print(SCREEN_RED + DEATH_MESSAGE + SCREEN_WHITE)
+        else:
+            if not (self.changeLocation('north')):
+                print(SCREEN_RED + "You cannot go north" + SCREEN_WHITE)
 
-        print(self.describeLocation())
+            print(self.describeLocation())
 
     def do_south(self, args):
-        if not (self.changeLocation('south')):
-            print(SCREEN_RED + "You cannot go south" + SCREEN_WHITE)
+        if self.checkDeath():
+            print(SCREEN_RED + DEATH_MESSAGE + SCREEN_WHITE)
+        else:
+            if not (self.changeLocation('south')):
+                print(SCREEN_RED + "You cannot go south" + SCREEN_WHITE)
 
-        print(self.describeLocation())
+            print(self.describeLocation())
 
     def do_east(self, args):
-        if not (self.changeLocation('east')):
-            print(SCREEN_RED + "You cannot go east" + SCREEN_WHITE)
+        if self.checkDeath():
+            print(SCREEN_RED + DEATH_MESSAGE + SCREEN_WHITE)
+        else:
+            if not (self.changeLocation('east')):
+                print(SCREEN_RED + "You cannot go east" + SCREEN_WHITE)
 
-        print(self.describeLocation())
+            print(self.describeLocation())
 
     def do_west(self, args):
-        if not (self.changeLocation('west')):
-            print(SCREEN_RED + "You cannot go west" + SCREEN_WHITE)
+        if self.checkDeath():
+            print(SCREEN_RED + DEATH_MESSAGE + SCREEN_WHITE)
+        else:
+            if not (self.changeLocation('west')):
+                print(SCREEN_RED + "You cannot go west" + SCREEN_WHITE)
 
-        print(self.describeLocation())
+            print(self.describeLocation())
 
 if __name__ == '__main__':
 
