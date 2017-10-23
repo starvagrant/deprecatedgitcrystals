@@ -4,7 +4,7 @@ import cmd, textwrap
 from BaseController import *
 from ControllerFactory import *
 
-SCREEN_WIDTH = 80
+SCREEN_WIDTH = 65
 
 SCREEN_RED = "\033[31m"
 SCREEN_ORANGE = "\033[33m"
@@ -13,6 +13,8 @@ SCREEN_GREEN = "\033[32m"
 SCREEN_BLUE = "\033[34m"
 SCREEN_PURPLE = "\033[35m"
 SCREEN_WHITE = "\033[0m"
+T = "| "
+U = "    "
 
 
 class ExampleCmd(cmd.Cmd):
@@ -31,14 +33,12 @@ class ExampleCmd(cmd.Cmd):
 
     def describeLocation(self):
         location = self.temp.data['location']
-        description = SCREEN_CYAN + '\n' + location + '\n'
-        description += "=" * len(location) + '\n\n' + SCREEN_WHITE
-        description += self.worldRooms.data[location]['desc'] + '\n\n'
-        description += SCREEN_BLUE + "Exits" + '\n'
-        description += "-----" + '\n\n' + SCREEN_WHITE
+        description = SCREEN_CYAN + '\n' + T + location + '\n\n' + SCREEN_WHITE                         # Location Name
+        description += U + textwrap.fill(self.worldRooms.data[location]['desc'], SCREEN_WIDTH) + '\n\n' # Location Description
+        description += SCREEN_BLUE + T + "Exits" + SCREEN_WHITE + '\n\n'
         for direction in ('north','east','west','south'):
             if direction in self.worldRooms.data[location].keys():
-               description += direction.title() + " : " + self.worldRooms.data[location][direction]  + '\n'
+               description += U + direction.title() + " : " + self.worldRooms.data[location][direction]  + '\n' # Exits
 
         return description
 
