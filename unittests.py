@@ -75,4 +75,33 @@ class MyTests(unittest.TestCase):
         self.assertEqual(game.temp.data['location'], "Mountain Cave")
         self.assertEqual(game.worldRooms.data['Abandoned Treasury']['danger'][0], "Search")
 
+    def test_north_south_east_west(self):
+        factory = ControllerFactory(True)
+        controllers = factory.initGame('mock-data')
+        game = gitgame.ExampleCmd()
+        game.loadControllers(controllers)
+
+        game.do_north()
+        game.do_west()
+        game.do_east()
+        game.do_south()
+
+        self.assertEqual(game.temp.data['location'], "Mountain Cave")
+
+    def test_death_upon_entry(self):                                        # NNWW leads to the bottomless pit
+        """ Test to See if Deadly Rooms Kill Character """
+        factory = ControllerFactory(True)
+        controllers = factory.initGame('mock-data')
+
+        game = gitgame.ExampleCmd()
+        game.loadControllers(controllers)
+
+        game.do_north()
+        game.do_north()
+        game.do_west()
+        game.do_west()
+
+        self.assertEqual(game.temp.data['location'], "Bottomless Pit")
+        self.assertEqual(game.alive.data['alive'], False)
+
 unittest.main()
