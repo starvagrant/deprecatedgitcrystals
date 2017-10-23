@@ -8,7 +8,7 @@ from pprint import pprint
 from BaseController import BaseController
 from ControllerFactory import ControllerFactory
 
-class MyTests(unittest.TestCase): #19 25 35 65 49
+class MyTests(unittest.TestCase):
     def test_parse_json(self):
         """ test static method BaseController.parseJson parses Json """
         testJson = BaseController.parseJson('{"a":"a","b":"b"}')
@@ -46,7 +46,7 @@ class MyTests(unittest.TestCase): #19 25 35 65 49
         factory = ControllerFactory(True)
         jsonFileList = factory.scanDir('mock-data')
 
-        testFactory = factory.createController(jsonFileList[1])             # jsonFileList item should = 'base'
+        testFactory = factory.createController(jsonFileList[1])                      # jsonFileList item should = 'base'
         self.assertEqual(testFactory.data, BaseController('mock-data', 'base').data) # Python can't compare two objects,
                                                                                      # except by reference
 
@@ -62,7 +62,7 @@ class MyTests(unittest.TestCase): #19 25 35 65 49
 
     def test_game_controllers(self):
         factory = ControllerFactory(True)
-        controllers = factory.initGame('mock-data')         # test fails without saved-game/base.json
+        controllers = factory.initGame('mock-data')
 
         game = gitgame.ExampleCmd()
         game.loadControllers(controllers)
