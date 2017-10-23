@@ -75,16 +75,40 @@ class MyTests(unittest.TestCase):
         self.assertEqual(game.temp.data['location'], "Mountain Gate")
         self.assertEqual(game.worldRooms.data['Abandoned Treasury']['danger'][0], "Search")
 
+    def test_checkDeath(self):
+        """ Test Internal Death Checking Method """
+        factory = ControllerFactory(True)
+        controllers = factory.initGame('mock-data')
+        game = gitgame.ExampleCmd()
+        game.loadControllers(controllers)
+
+        self.assertFalse(game.checkDeath())
+        game.alive.data['alive'] = False
+        self.assertTrue(game.checkDeath())
+
+    def test_north(self):
+        """ Test Internal Method changeLocation """
+        factory = ControllerFactory(True)
+        controllers = factory.initGame('mock-data')
+        game = gitgame.ExampleCmd()
+        game.loadControllers(controllers)
+
+        self.assertFalse(game.changeLocation('spiral'))
+        self.assertFalse(game.changeLocation('west'))                       # North Only at Game Beginning
+        game.changeLocation('north')
+        self.assertEqual(game.temp.data['location'], "Git Crystal")
+
+
     def test_north_south_east_west(self):
         factory = ControllerFactory(True)
         controllers = factory.initGame('mock-data')
         game = gitgame.ExampleCmd()
         game.loadControllers(controllers)
 
-        game.do_north()
-        game.do_west()
-        game.do_east()
-        game.do_south()
+        game.changeLocation('north')
+        game.changeLocation('east')
+        game.changeLocation('west')
+        game.changeLocation('south')
 
         self.assertEqual(game.temp.data['location'], "Mountain Gate")
 
@@ -96,10 +120,10 @@ class MyTests(unittest.TestCase):
         game = gitgame.ExampleCmd()
         game.loadControllers(controllers)
 
-        game.do_north()
-        game.do_north()
-        game.do_west()
-        game.do_west()
+        game.changeLocation('north')
+        game.changeLocation('north')
+        game.changeLocation('west')
+        game.changeLocation('west')
 
         self.assertEqual(game.temp.data['location'], "Bottomless Pit")
         self.assertEqual(game.alive.data['alive'], False)
