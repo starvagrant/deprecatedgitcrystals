@@ -42,12 +42,47 @@ class ExampleCmd(cmd.Cmd):
 
         return description
 
-    def do_echo(self,arg):
-        print(arg.lower())
+    def changeLocation(self, direction=False):
+        if not direction:
+            return False
 
-    def do_show(self,arg):
+        location = self.temp.data['location']
+        if location in self.worldRooms.data.keys():
+            if direction in self.worldRooms.data[location]:
+                self.temp.data['location'] = self.worldRooms.data[location][direction]
+                return self.temp.data['location']
+            else:
+                return False
+
+    def do_echo(self,args):
+        print(args.lower())
+
+    def do_show(self, args):
         print(self.describeLocation())
 
+    def do_north(self, args):
+        if not (self.changeLocation('north')):
+            print(SCREEN_RED + "You cannot go north" + SCREEN_WHITE)
+
+        print(self.describeLocation())
+
+    def do_south(self, args):
+        if not (self.changeLocation('south')):
+            print(SCREEN_RED + "You cannot go south" + SCREEN_WHITE)
+
+        print(self.describeLocation())
+
+    def do_east(self, args):
+        if not (self.changeLocation('east')):
+            print(SCREEN_RED + "You cannot go east" + SCREEN_WHITE)
+
+        print(self.describeLocation())
+
+    def do_west(self, args):
+        if not (self.changeLocation('west')):
+            print(SCREEN_RED + "You cannot go west" + SCREEN_WHITE)
+
+        print(self.describeLocation())
 
 if __name__ == '__main__':
 
