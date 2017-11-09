@@ -13,9 +13,17 @@ class Tests(unittest.TestCase):
 
     def test_recordable_writes(self):
         """ I need to test that the recordable class properly writes files"""
+        jsonFile = recordable.Recordable('mock-data')
+        jsonFile.write()
+        jsonFile.load()
+        self.assertEqual(jsonFile.data['first'], "first")
+        self.assertEqual(jsonFile.data['second'], "second")
 
     def test_recordable_repr(self):
         """ I need to test the recordable test implments __repr__ as expected """
+        jsonFile = recordable.Recordable('mock-data')
+        printed_object = "The object base\nHas keys: \nfirst, second, "
+        self.assertEqual(jsonFile.__repr__(), printed_object)
 
     def test_game_recordables_initialized(self):
         """ I need to test that a game contains the proper recordables.
