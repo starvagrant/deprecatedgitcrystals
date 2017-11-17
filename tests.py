@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 
 import unittest
-import recordable
-import json
+import recordable, character
 
 class Tests(unittest.TestCase):
     def test_recordable_reads(self):
@@ -26,6 +25,31 @@ class Tests(unittest.TestCase):
         printed_regex = "The object base\nHas keys: \n(second|first), (first|second)"
         self.assertRegex(jsonFile.__repr__(), printed_regex)
 
+    def test_player_character(self):
+        aliveJson = recordable.Recordable('mock-data', 'alive')
+        statusJson = recordable.Recordable('mock-data', 'status')
+        locationJson = recordable.Recordable('mock-data', 'location')
+        inventoryJson = recordable.Recordable('mock-data', 'inventory')
+        recordables = [aliveJson, statusJson, locationJson, inventoryJson]
+        testPlayer = character.Character(recordables)
+
+        self.assertEqual(testPlayer.inventory['weapons'][0], "Unarmed")
+        self.assertEqual(testPlayer.alive['alive'], True)
+        self.assertEqual(testPlayer.status['floating'], False)
+        self.assertEqual(testPlayer.location['location'], "Mountain Gate")
+
+    def test_non_player_character(self):
+        aliveJson = recordable.Recordable('mock-data/characters', 'alive')
+        statusJson = recordable.Recordable('mock-data/characters', 'status')
+        relationshipJson = recordable.Recordable('mock-data/characters', 'relationship')
+        recordables = [aliveJson, statusJson, relationshipJson]
+        testNonPlayer = character.Character(recordables)
+
+        # Values Based on Dragon NPC
+        self.assertEqual(testNonPlayer.alive['alive'], True)
+        self.assertEqual(testNonPlayer.status['asleep'], True)
+        self.assertEqual(testNonPlayer.relationship['knows_player'], False)
+        self.assertEqual(testNonPlayer.isPlayer, False)
 
     def test_game_recordables_initialized(self):
         """ I need to test that a game contains the proper recordables.
