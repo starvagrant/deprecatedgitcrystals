@@ -1,5 +1,4 @@
 import cavemap
-
 class Character(object):
     def __init__(self,recordables = []):
         self.recordables = recordables
@@ -18,18 +17,14 @@ class Character(object):
                 self.relationship = jsonFile.data
                 self.isPlayer = False
 
-    def move(self, direction, rooms = cavemap.Map()):
-        if direction.lower() == "north" and self.rooms[self.x][self.y-1] is not None:
-            self.location = self.rooms[self.x][self.y-1]
-            self.y -= 1
-        if direction.lower() == "south" and self.rooms[self.x][self.y+1] is not None:
-            self.location = self.rooms[self.x][self.y+1]
-            self.y += 1
-        if direction.lower() == "east" and self.rooms[self.x+1][self.y] is not None:
-            self.location = self.rooms[self.x+1][self.y]
-            self.x = 1
-        if direction.lower() == "west" and self.rooms[self.x-1][self.y] is not None:
-            self.location = self.rooms[self.x+1][self.y]
+    def move(self, direction, mapObject):
+        movement = direction.lower()
+        if movement in ["north","south","east","west"]:
+            self.location['location'] = mapObject.move(movement, self.location['location'])
+            for jsonFile in self.recordables:
+                if jsonFile.name == "location":
+                    jsonFile.data['location'] = self.location['location']
+                    jsonFile.write()
 
     def checkLocation(self):
         """ check to see location has traps """

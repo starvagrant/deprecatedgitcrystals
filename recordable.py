@@ -20,10 +20,8 @@ class Recordable(object):
             f.write(json.dumps(self.data, sort_keys=True,
                                indent=4, separators=(',',':')))
             f.close()
+    def __eq__(self,other):
+        return self.data == other.data
 
-    def __repr__(self):
-        obj = "The object " + self.name + '\n'
-        obj += "Has keys: " + '\n'
-        for array_key in self.data.keys():
-            obj += array_key + ", "
-        return obj
+    def __ne__(self,other):
+        return not self.data == other.data

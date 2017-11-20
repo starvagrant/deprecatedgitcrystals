@@ -1,8 +1,15 @@
+import recordable
+
 class Map:
-   def __init__(self):
-        self.rooms = [
-             [ None, "Abandoned Treasury", "Dragon's Lair", None, None],
-             [ "Bottomless Pit", "Alchemist Lab", "Stalagmite Central", None, None],
-             [ "Impressive Caverns", "Wizard's Library", "Git Crystal", "Mine Entrance","Mine"],
-             [None,None,"Mountain Gate","Armory", None]
-            ]
+    def __init__(self, mapRecordable):
+
+        self.data = mapRecordable.load()
+
+    def move(self, direction, location):
+        """ Return the new location when a character moves,
+        when provided with room and direction"""
+        if location in self.data:
+            if direction in self.data[location]:
+                newLocation = self.data[location][direction]
+                return newLocation
+        return None
