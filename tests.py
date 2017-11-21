@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import unittest
-import recordable, character, cavemap
+import recordable, character, cavemap, gitgame
 
 class Tests(unittest.TestCase):
     def test_recordable_reads(self):
@@ -80,6 +80,35 @@ class Tests(unittest.TestCase):
 
         testPlayer.move('west', rooms)
         testPlayer.move('south', rooms)
+
+        originalLocationJson = recordable.Recordable('mock-data','location')
+
+        self.assertNotEqual(locationJson, changedLocationJson)
+        self.assertEqual(locationJson, originalLocationJson)
+
+    def test_game_initialization(self):
+        """ Test GitGameCmd initializes correctly """
+        game = gitgame.GitGameCmd('mock-data')
+        self.assertIn('cmdloop', dir(game))
+
+    def test_game_movement(self):
+        """ Test Command Line Movement """
+        game = gitgame.GitGameCmd('mock-data')
+        locationJson = recordable.Recordable('mock-data', 'location')
+        roomJson = recordable.Recordable('mock-data', 'worldRooms')
+        recordables = [locationJson]
+        testPlayer = character.Character(recordables)
+
+        game.do_north('')
+        self.assertEqual(game.player.location['location'], "Git Crystal")
+
+        game.do_east('')
+        self.assertEqual(game.player.location['location'], "Mine Entrance")
+
+        changedLocationJson = recordable.Recordable('mock-data', 'location')
+
+        game.do_west('')
+        game.do_south('')
 
         originalLocationJson = recordable.Recordable('mock-data','location')
 
