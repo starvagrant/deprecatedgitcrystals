@@ -115,6 +115,17 @@ class Tests(unittest.TestCase):
         self.assertNotEqual(locationJson, changedLocationJson)
         self.assertEqual(locationJson, originalLocationJson)
 
+    def test_invalid_move(self):
+        """ Test that an invalid movement can't be made """
+        game = gitgame.GitGameCmd('mock-data')
+        locationJson = recordable.Recordable('mock-data', 'location')
+        roomJson = recordable.Recordable('mock-data', 'worldRooms')
+        recordables = [locationJson]
+        testPlayer = character.Character(recordables)
+
+        game.do_west('')
+        self.assertEqual(testPlayer.location['location'], "Mountain Gate") # Invalid move
+
     def test_game_display(self):
         """ Test Game Room Display """
         game = gitgame.GitGameCmd('mock-data')

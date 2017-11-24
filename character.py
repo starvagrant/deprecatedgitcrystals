@@ -20,11 +20,12 @@ class Character(object):
     def move(self, direction, mapObject):
         movement = direction.lower()
         if movement in ["north","south","east","west"]:
-            self.location['location'] = mapObject.move(movement, self.location['location'])
-            for jsonFile in self.recordables:
-                if jsonFile.name == "location":
-                    jsonFile.data['location'] = self.location['location']
-                    jsonFile.write()
+            if mapObject.move(movement, self.location['location']) is not None:
+                self.location['location'] = mapObject.move(movement, self.location['location'])
+                for jsonFile in self.recordables:
+                    if jsonFile.name == "location":
+                        jsonFile.data['location'] = self.location['location']
+                        jsonFile.write()
 
     def checkLocation(self):
         """ check to see location has traps """
