@@ -27,17 +27,31 @@ class GitGameCmd(cmd.Cmd):
     def default(self, args):
         print("I do not understand that command. Type help for a list of commands.")
 
+    def displayPlayerLocation(self, mapObject):
+        location = self.player.location['location']
+        text = "You are located in the " + location + "\n"
+        text += "The adjacent rooms are :\n"
+        for direction in ('north','east','south','west'):
+            if self.map.move(direction,location) is not None:
+                text += direction + ": " + self.map.move(direction, location) + "\n"
+
+        return text
+
     def do_north(self, args):
         self.player.move('north', self.map)
+        print(self.displayPlayerLocation(self.map))
 
     def do_south(self, args):
         self.player.move('south', self.map)
+        print(self.displayPlayerLocation(self.map))
 
     def do_east(self, args):
         self.player.move('east', self.map)
+        print(self.displayPlayerLocation(self.map))
 
     def do_west(self, args):
         self.player.move('west', self.map)
+        print(self.displayPlayerLocation(self.map))
 
 if __name__ == '__main__':
     print('Welcome to Git Crystals!')

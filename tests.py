@@ -115,4 +115,31 @@ class Tests(unittest.TestCase):
         self.assertNotEqual(locationJson, changedLocationJson)
         self.assertEqual(locationJson, originalLocationJson)
 
+    def test_game_display(self):
+        """ Test Game Room Display """
+        game = gitgame.GitGameCmd('mock-data')
+        locationJson = recordable.Recordable('mock-data', 'location')
+        roomJson = recordable.Recordable('mock-data', 'worldRooms')
+        recordables = [locationJson]
+        testPlayer = character.Character(recordables)
+        worldMap = game.map
+
+        firstRoom = game.displayPlayerLocation(worldMap)
+        roomText = "You are located in the Mountain Gate\n"
+        roomText += "The adjacent rooms are :\n"
+        roomText += "north: Git Crystal\n"
+        self.assertEqual(firstRoom, roomText)
+
+        game.do_north('')
+        secondRoom = game.displayPlayerLocation(worldMap)
+        roomText = "You are located in the Git Crystal\n"
+        roomText += "The adjacent rooms are :\n"
+        roomText += "north: Stalagmite Central\n"
+        roomText += "east: Mine Entrance\n"
+        roomText += "south: Mountain Gate\n"
+        roomText += "west: Wizard's Library\n"
+        self.assertEqual(secondRoom, roomText)
+
+        game.do_south('') # Reset to initial location
+
 unittest.main()
