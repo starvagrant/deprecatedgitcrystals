@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import unittest
-import recordable, character, cavemap, gitgame
+import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
     def test_recordable_reads(self):
@@ -152,5 +152,35 @@ class Tests(unittest.TestCase):
         self.assertEqual(secondRoom, roomText)
 
         game.do_south('') # Reset to initial location
+
+    def test_git_status(self):
+        """ Test the git status command """
+        repo = gamerepo.GitCmd('mock-data')
+        repo.do_status('')
+        self.assertEqual(repo.currentMessage, "{'untracked.txt': 128}")
+
+    def test_git_diff(self, ref1, ref2, options=None, files = []):
+        """ Test the git diff command """
+        """
+        Proposed Beginner's Diff Entry:
+        File differences:
+            from commit 24d23af (references)
+            to commit f8f2231: (references)
+
+        File 1:
+            from commit 24d23af: <file-name>
+            to commit f8f2231: <file-name>
+        Diff:
+
+        """
+        repo = gamerepo.GitCmd('mock-data')
+        repo.do_diff()
+        self.assertEqual(repo.currentDiff, '')
+        repo.do_diff('HEAD', 'HEAD~2')
+        self.assertEqual(repo.currentDiff, '')
+
+    def test_git_log(self, branchTip, depth=20):
+        """ Test the git log command """
+
 
 unittest.main()
