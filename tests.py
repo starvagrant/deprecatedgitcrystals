@@ -182,5 +182,33 @@ class Tests(unittest.TestCase):
     def test_git_log(self, branchTip, depth=20):
         """ Test the git log command """
 
+    def test_revparsing(self):
+        git = gamerepo.GitCmd('mock-data')
+        rev1 = git.revparse('HEAD')
+        rev2 = git.revparse('master')
+        rev3 = git.revparse('test')
+        rev5 = git.revparse('a7c0d')
+
+        self.assertEqual(rev1.hex[:7], '21b4f39')
+        self.assertEqual(rev2.hex[:7], '21b4f39')
+        self.assertEqual(rev3.hex[:7], '775c873')
+        self.assertEqual(rev5.hex[:7], 'a7c0de9')
+
+        with self.assertRaises(ValueError) as context1:
+            git.revparse('0df')
+
+        with self.assertRaises(ValueError) as context2:
+            git.revparse('eec655')
+
+        with self.assertRaises(ValueError) as context3:
+            git.revparse('fecfda')
+
+        with self.assertRaises(ValueError) as context4:
+            git.revparse('notabranch')
+
+        self.assertEqual(str(context1.exception), '0df: ambiguous lookup - OID prefix is too short')
+        self.assertEqual(str(context2.exception),'Object is not a commit.')
+        self.assertEqual(str(context3.exception),'Object is not a commit.')
+        self.assertEqual(str(context4.exception), "Value 'notabranch' does not refer to a git commit")
 
 unittest.main()

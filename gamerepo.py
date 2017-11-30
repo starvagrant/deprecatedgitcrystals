@@ -27,6 +27,22 @@ class GitCmd(cmd.Cmd):
     def default(self, arg):
         print('I do not understand that command. Type "help" for a list of commands.')
 
+    def revparse(self, obj):
+        err = None
+        try:
+            ref = self.repo.revparse_single(obj)
+            if not isinstance(ref, pygit2.Commit):
+                raise ValueError("Object is not a commit.")
+        except KeyError as k:
+            err = 'Value ' + str(k) + ' does not refer to a git commit'
+        except (KeyError,ValueError) as e:
+            err = str(e)
+        finally:
+            if err is not None:
+                raise ValueError(err)
+
+        return ref
+
     # A very simple "quit" command to terminate the program:
     def do_quit(self, arg):
         """Quit the game."""
