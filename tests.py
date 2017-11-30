@@ -157,11 +157,12 @@ class Tests(unittest.TestCase):
         """ Test the git status command """
         repo = gamerepo.GitCmd('mock-data')
         repo.do_status('')
-        self.assertEqual(repo.currentMessage, "{'untracked.txt': 128}")
+        self.assertEqual(repo.currentMessage, "{'game.json': 258}") # File has staged and unstaged changes
 
-    def test_git_diff(self, ref1, ref2, options=None, files = []):
+    def test_git_diff(self):
         """ Test the git diff command """
         """
+        ref1, ref2, options=None, files = []):
         Proposed Beginner's Diff Entry:
         File differences:
             from commit 24d23af (references)
@@ -174,12 +175,10 @@ class Tests(unittest.TestCase):
 
         """
         repo = gamerepo.GitCmd('mock-data')
-        repo.do_diff()
-        self.assertEqual(repo.currentDiff, '')
+        repo.do_diff('')
         repo.do_diff('HEAD', 'HEAD~2')
-        self.assertEqual(repo.currentDiff, '')
 
-    def test_git_log(self, branchTip, depth=20):
+    def test_git_log(self):
         """ Test the git log command """
 
     def test_revparsing(self):
