@@ -71,46 +71,57 @@ class GitCmd(cmd.Cmd):
         Calculates the Diff between two commits
         DiffLine object: content_offset, content, origin, old_lineno, new_lineno
         """
-        ref1 = "HEAD~2"
-        ref2 = "HEAD"
-        c1 = self.repo.revparse_single(ref1)
-        c2 = self.repo.revparse_single(ref2)
-        diff = self.repo.diff(c1, c2)
+        args = arg.split()
+        try:
+            if len(args) > 2:
+                self.fullDiff = "Can only diff two commits"
+                print(self.fullDiff)
+                return
 
-        fullDiff = S_RED + '--- prev: ' + ref1 + ' (commit ' + c1.hex[:7] + ')\n'
-        fullDiff += S_GRE + '+++ current: ' + ref2 + ' (commit ' + c2.hex[:7] + ')\n'
-        patches = [p for p in diff]
-        for p in patches:
-            fullDiff += S_WHI + '='*SCREEN_WIDTH + '\n'
-            fullDiff += S_RED
+            commits = []
+            for a in args:
+               commits.append(self.revparse(a))
 
-            if p.delta.status == 1:
-                fullDiff += '--- ' + p.delta.old_file.path + ' does not exist in commit ' + c1.hex[:7] + '\n'
+            if args == []:
+                diff = self.repo.diff()
+                before = "commit " + self.revparse('HEAD').hex[:7]
+                after = "unstaged changes"
+            elif commits[0] == 'cached' or commits[0] == 'staged' and len(commits) < 2:
+                diff = self.repo.diff(cached=True)
+                before = "commit " + self.revparse('HEAD').hex[:7]
+                after = "staged changes"
+            elif commits[0] == 'cached' or commits[0] == 'staged' and isinstance(commits[1], pygit2.Commit):
+                diff = self.repo.diff(a = commits[1], cached=True)
+                before = "commit " + commits[1].hex[:7]
+                after = "staged changes"
+            elif isinstance(commits[0], pygit2.Commit) and len(commits) < 2:
+                diff = self.repo.diff(a = commits[0])
+                before = "commit " + commits[0].hex[:7]
+                after = "working directory"
+            elif isinstance(commits[0], pygit2.Commit) and isinstance(commits[1], pygit2.Commit):
+                diff = self.repo.diff(a=commits[0],b=commits[1])
+                before = "commit " + commits[0].hex[:7]
+                after = "commit " + commits[1].hex[:7]
             else:
-                fullDiff += '--- old file: ' + p.delta.old_file.path + ' in commit ' + c1.hex[:7] + '\n'
+                raise ValueError("arguments to git diff must represent commits / staging area")
 
-            fullDiff += S_GRE
-            if p.delta.status == 2:
-                fullDiff += '+++ ' + p.delta.new_file.path + ' does not exist in commit ' + c1.hex[:7] + '\n'
-            else:
-                fullDiff += '+++ new file: ' + p.delta.new_file.path + ' in commit ' + c2.hex[:7] + '\n'
+            patches = [p for p in diff]
+            self.fullDiff = ""
+            for patch in patches:
+                self.fullDiff += self.formatPatch(patch, before, after)
 
-            fullDiff += S_WHI + '='*SCREEN_WIDTH + '\n'
+            print(self.fullDiff)
+            return
 
-            for h in p.hunks:
-                fullDiff += '\n'
-                for l in h.lines:
-                    if l.origin == '-':
-                        fullDiff = S_RED + l.origin + l.content + S_WHI
-                    elif l.origin == '+':
-                        fullDiff += S_GRE + l.origin + l.content + S_WHI
-                    else:
-                        fullDiff += l.origin + l.content + S_WHI
+        except ValueError:
+            self.fullDiff = None
+            return """
+Git Crystals Can Only Diff Two Commit Objects, or One Commit
+Object and the working directory / or staging area. Refer to
+the Refer them
+via SHA, abbreviated SHA (at least 5 characters), branch,
+tag name, or via HEAD, HEAD~1, HEAD^ style notation"""
 
-                fullDiff += '\n'
-
-        self.fullDiff = fullDiff
-        print(self.fullDiff)
 
 if __name__ == '__main__':
    print("Git Command Line")
