@@ -43,6 +43,34 @@ class GitCmd(cmd.Cmd):
 
         return ref
 
+    def formatPatch(self, patch, before, after):
+        screen = S_WHI + '='*SCREEN_WIDTH + '\n'
+        delta = patch.delta
+
+        screen += S_RED
+        if delta.status == 1:   # File Added
+            screen += '--- ' + delta.old_file.path + "does not exist in " + before + '\n'
+        else:
+            screen += '--- old file: ' + delta.old_file.path + ' in ' + before + '\n'
+
+        screen += S_GRE
+        if delta.status == 2:  # File Removed
+            screen += '+++ ' + delta.new_file.path + ' does not exist in ' + after + '\n'
+        else:
+            screen += '+++ new file: ' + delta.new_file.path + ' in ' + after + '\n'
+
+        for hunk in patch.hunks:
+            screen += '\n'
+            for line in hunk.lines:
+                if line.origin == '-':
+                    screen += S_RED + line.origin + line.content + S_WHI
+                elif line.origin == '+':
+                    screen += S_GRE + line.origin + line.content + S_WHI
+                else:
+                    screen += S_WHI + line.origin + line.content
+
+        return screen
+
     # A very simple "quit" command to terminate the program:
     def do_quit(self, arg):
         """Quit the game."""
