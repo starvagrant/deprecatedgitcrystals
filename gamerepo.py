@@ -29,6 +29,8 @@ class GitCmd(cmd.Cmd):
 
     def revparse(self, obj):
         err = None
+        if obj == 'staged' or obj == 'cached':
+            return obj
         try:
             ref = self.repo.revparse_single(obj)
             if not isinstance(ref, pygit2.Commit):
