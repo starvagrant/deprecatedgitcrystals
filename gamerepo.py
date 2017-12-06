@@ -14,7 +14,6 @@ DEATH_MESSAGE = "***You Are Dead. Commit Your Progress. Type help git for furthe
 
 class GitCmd(cmd.Cmd):
 
-
     def __init__(self, repodir="saved-game"):
         super().__init__()
 
@@ -152,6 +151,8 @@ the Refer them
 via SHA, abbreviated SHA (at least 5 characters), branch,
 tag name, or via HEAD, HEAD~1, HEAD^ style notation"""
 
+    def do_show(self,arg):
+        print(repr(arg.split()))
 
 if __name__ == '__main__':
    print("Git Command Line")

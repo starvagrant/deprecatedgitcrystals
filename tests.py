@@ -176,7 +176,7 @@ class Tests(unittest.TestCase):
         """
         repo = gamerepo.GitCmd('mock-data')
         repo.do_diff('')
-        repo.do_diff('HEAD', 'HEAD~2')
+        repo.do_diff('HEAD HEAD~2')
 
     def test_git_log(self):
         """ Test the git log command """
