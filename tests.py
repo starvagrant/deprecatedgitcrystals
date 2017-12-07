@@ -160,23 +160,135 @@ class Tests(unittest.TestCase):
         self.assertEqual(repo.currentMessage, "{'game.json': 258}") # File has staged and unstaged changes
 
     def test_git_diff(self):
-        """ Test the git diff command """
-        """
-        ref1, ref2, options=None, files = []):
-        Proposed Beginner's Diff Entry:
-        File differences:
-            from commit 24d23af (references)
-            to commit f8f2231: (references)
-
-        File 1:
-            from commit 24d23af: <file-name>
-            to commit f8f2231: <file-name>
-        Diff:
-
-        """
         repo = gamerepo.GitCmd('mock-data')
+
         repo.do_diff('')
-        repo.do_diff('HEAD HEAD~2')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- old file: game.json in commit 21b4f39
+[32m+++ new file: game.json in unstaged changes
+
+[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "rooms":{
+[0m         "filename":"alive",
+""")
+
+        repo.do_diff('cached')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- old file: game.json in commit 21b4f39
+[32m+++ new file: game.json in staged changes
+
+[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "rooms":{
+[0m         "filename":"alive",
+""")
+
+        repo.do_diff('HEAD')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- old file: game.json in commit 21b4f39
+[32m+++ new file: game.json in working directory
+
+[0m     "alive":true,
+[0m     "inventory":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "rooms":{
+[0m         "filename":"alive",
+
+[0m             "west":"Impressive Caverns"
+[0m         }
+[0m     }
+[31m-}[0m[0m>
+\ No newline at end of file
+[32m+}
+[0m""")
+
+        repo.do_diff('staged HEAD~1')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- characters/alive.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/alive.json in staged changes
+
+[32m+{
+[0m[32m+    "alive":true
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/relationship.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/relationship.json in staged changes
+
+[32m+{
+[0m[32m+    "knows_player": false,
+[0m[32m+    "aware_of_presence": false,
+[0m[32m+    "hostility_level": 4
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/status.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/status.json in staged changes
+
+[32m+{
+[0m[32m+    "asleep":true
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- old file: game.json in commit a7c0de9
+[32m+++ new file: game.json in staged changes
+
+[0m     "alive":true,
+[0m     "inventory":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+
+[0m             "west":"Impressive Caverns"
+[0m         }
+[0m     }
+[31m-}[0m[0m>
+\ No newline at end of file
+[32m+}
+[0m""")
+
+        repo.do_diff('HEAD~1 HEAD')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- characters/alive.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/alive.json in commit 21b4f39
+
+[32m+{
+[0m[32m+    "alive":true
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/relationship.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/relationship.json in commit 21b4f39
+
+[32m+{
+[0m[32m+    "knows_player": false,
+[0m[32m+    "aware_of_presence": false,
+[0m[32m+    "hostility_level": 4
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/status.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/status.json in commit 21b4f39
+
+[32m+{
+[0m[32m+    "asleep":true
+[0m[32m+}
+[0m""")
 
     def test_git_log(self):
         """ Test the git log command """
