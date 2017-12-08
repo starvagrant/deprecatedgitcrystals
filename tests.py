@@ -322,4 +322,15 @@ class Tests(unittest.TestCase):
         self.assertEqual(str(context3.exception),'Object is not a commit.')
         self.assertEqual(str(context4.exception), "Value 'notabranch' does not refer to a git commit")
 
+    def test_statusparsing(self):
+        git = gamerepo.GitCmd('mock-data')
+        self.assertEqual(git.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
+        self.assertEqual(git.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
+        self.assertEqual(git.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
+
+        game = gitgame.GitGameCmd('mock-data')
+        self.assertEqual(game.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
+        self.assertEqual(game.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
+        self.assertEqual(game.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
+
 unittest.main()

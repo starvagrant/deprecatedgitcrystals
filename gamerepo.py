@@ -72,6 +72,33 @@ class GitCmd(cmd.Cmd):
 
         return screen
 
+    def statusParse(self, fileName, num):
+        status = {'name': fileName, 'status': [] }
+        if num > 17287 or num < 0:
+            raise ValueError('Status Number Out of Bounds')
+        if num//16384 > 0:
+            status['status'].append('Ignored')
+            num -= 16384
+        if num//512 > 0:
+            status['status'].append('Unstaged File Deletion')
+            num -= 512
+        if num//256 > 0:
+            status['status'].append('Unstaged File Changes')
+            num -= 256
+        if num//128 > 0:
+            status['status'].append('Untracked File')
+            num -= 128
+        if num//4 > 0:
+            status['status'].append('Staged File Deletion')
+            num -= 4
+        if num//2 > 0:
+            status['status'].append('Staged File Changes')
+            num -= 2
+        if num % 2 == 1:
+            status['status'].append('Staged New File')
+
+        return status
+
     # A very simple "quit" command to terminate the program:
     def do_quit(self, arg):
         """Quit the game."""
@@ -92,8 +119,51 @@ class GitCmd(cmd.Cmd):
                 print("Filepath %s isn't clean" % filepath)
         """
         status = self.repo.status()
-        self.currentMessage = repr(status)
-        print(self.currentMessage)
+        entries = []
+        for fileName in status.keys():
+            entries.append(self.statusParse(fileName, status[fileName]))
+
+        staged = []
+        unstaged = []
+        untracked = []
+
+        for entry in entries:
+            if entry['status'].__contains__('Staged File Deletion') or entry['status'].__contains__('Staged File Changes') or entry['status'].__contains__('Staged New File'):
+                staged.append(entry)
+
+            if entry['status'].__contains__('Unstaged File Deletion') or entry['status'].__contains__('Unstaged File Changes'):
+                unstaged.append(entry)
+            if entry['status'].__contains__('Untracked File'):
+                untracked.append(entry)
+
+        self.statusMessage = S_BLU + "Repository Status" + '\n'
+        self.statusMessage += '-'*SCREEN_WIDTH + '\n'
+        if len(staged) > 0:
+            self.statusMessage += S_GRE + "Staging Area" + '\n' + '    Files:' + '\n'
+            for fileName in staged:
+                self.statusMessage += '     ' + fileName['name']
+                for state in fileName['status']:
+                    if state.startswith('Staged'):
+                        self.statusMessage += " " + state + '\n'
+            self.statusMessage += '\n' + S_WHI
+        if len(unstaged) > 0:
+            self.statusMessage += S_RED + "Unstaged Changes" + '\n' + '    Files:' +  '\n'
+            for fileName in unstaged:
+                self.statusMessage += '     ' + fileName['name']
+                for state in fileName['status']:
+                    if state.startswith('Unstaged'):
+                        self.statusMessage += " " + state + '\n'
+            self.statusMessage += '\n' + S_WHI
+        if len(untracked) > 0:
+            self.statusMessage += S_CYA + "Untracked Files" + '\n' + '    Files:' + '\n'
+            for fileName in untracked:
+                self.statusMessage += '     ' + fileName['name']
+                for state in fileName['status']:
+                    if state.startswith('Untracked'):
+                        self.statusMessage += " " + state + '\n'
+            self.statusMessage += '\n' + S_WHI
+
+        print(self.statusMessage)
 
     def do_diff(self,arg):
         """
