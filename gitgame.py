@@ -2,13 +2,24 @@
 import cmd
 import recordable
 import cavemap,character
+import gamerepo
 
-class GitGameCmd(cmd.Cmd):
+SCREEN_WIDTH = 65
+S_RED = "\033[31m"
+S_ORA = "\033[33m"
+S_CYA = "\033[36m"
+S_GRE = "\033[32m"
+S_BLU = "\033[34m"
+S_PUR = "\033[35m"
+S_WHI = "\033[0m"
+
+class GitGameCmd(gamerepo.GitCmd):
+    prompt = '\n\033[0mGit Crystals> '
+
     def __init__(self, gamedir="saved-game"):
-        super().__init__()
+        super().__init__(gamedir)
 
         self.gamedir = gamedir
-        prompt = '\n Git Crystals> '
 
         # Player Data
         inventory = recordable.Recordable(gamedir, 'inventory')

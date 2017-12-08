@@ -14,11 +14,12 @@ DEATH_MESSAGE = "***You Are Dead. Commit Your Progress. Type help git for furthe
 
 class GitCmd(cmd.Cmd):
 
+    prompt = S_WHI + '\n Git Mode> '
+
     def __init__(self, repodir="saved-game"):
         super().__init__()
 
         self.gamedir = repodir
-        prompt = '\n Git Mode> '
         repoName = repodir + '/.git'
         self.repo = pygit2.Repository(repoName)
         self.currentMessage = ''
