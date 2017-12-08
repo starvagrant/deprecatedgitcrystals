@@ -139,25 +139,42 @@ class Tests(unittest.TestCase):
         roomText = "You are located in the Mountain Gate\n"
         roomText += "The adjacent rooms are :\n"
         roomText += "north: Git Crystal\n"
-        self.assertEqual(firstRoom, roomText)
+        self.assertEqual(firstRoom, """[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    You are located in the [36mMountain Gate[34m
+The adjacent rooms are :
+north: [32mGit Crystal[34m
+[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
+""")
 
         game.do_north('')
         secondRoom = game.displayPlayerLocation(worldMap)
-        roomText = "You are located in the Git Crystal\n"
-        roomText += "The adjacent rooms are :\n"
-        roomText += "north: Stalagmite Central\n"
-        roomText += "east: Mine Entrance\n"
-        roomText += "south: Mountain Gate\n"
-        roomText += "west: Wizard's Library\n"
-        self.assertEqual(secondRoom, roomText)
+        self.assertEqual(secondRoom, """[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    You are located in the [36mGit Crystal[34m
+The adjacent rooms are :
+north: [32mStalagmite Central[34m
+east: [32mMine Entrance[34m
+south: [32mMountain Gate[34m
+west: [32mWizard's Library[34m
+[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
+""")
 
         game.do_south('') # Reset to initial location
 
     def test_git_status(self):
         """ Test the git status command """
-        repo = gamerepo.GitCmd('mock-data')
-        repo.do_status('')
-        self.assertEqual(repo.currentMessage, "{'game.json': 258}") # File has staged and unstaged changes
+        game = gitgame.GitGameCmd('mock-data')
+        game.do_status('')
+        self.assertEqual(game.statusMessage, """[34mRepository Status
+-----------------------------------------------------------------
+[32mStaging Area
+    Files:
+     game.json Staged File Changes
+
+[0m[31mUnstaged Changes
+    Files:
+     game.json Unstaged File Changes
+
+[0m""")
 
     def test_git_diff(self):
         repo = gamerepo.GitCmd('mock-data')
