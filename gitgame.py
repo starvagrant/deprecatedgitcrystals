@@ -52,18 +52,38 @@ class GitGameCmd(gamerepo.GitCmd):
         return text
 
     def do_north(self, args):
+        """ Move Player Location North
+            Usage: 'north'
+            Additional Arguments: Game Ignores Input after north
+            File: this command alters the location.json file
+        """
         self.player.move('north', self.map)
         print(self.displayPlayerLocation(self.map))
 
     def do_south(self, args):
+        """ Move Player Location South
+    Usage: 'north'
+    Additional Arguments: Game Ignores Input after north
+    File: this command alters the location.json file
+        """
         self.player.move('south', self.map)
         print(self.displayPlayerLocation(self.map))
 
     def do_east(self, args):
+        """ Move Player Location East
+    Usage: 'east'
+    Additional Arguments: Game Ignores Input after north
+    File: this command alters the location.json file
+        """
         self.player.move('east', self.map)
         print(self.displayPlayerLocation(self.map))
 
     def do_west(self, args):
+        """ Move Player Location West
+    Usage: 'west'
+    Additional Arguments: Game Ignores Input after north
+    File: this command alters the location.json file
+            """
         self.player.move('west', self.map)
         print(self.displayPlayerLocation(self.map))
 
@@ -73,5 +93,7 @@ if __name__ == '__main__':
     print()
     print('(Type "help" for commands.)')
     print()
-    GitGameCmd().cmdloop()
+    game = GitGameCmd('saved-game')
+    print(game.displayPlayerLocation(game.map))
+    game.cmdloop()
     print('Thanks for playing!')
