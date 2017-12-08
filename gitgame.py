@@ -29,11 +29,14 @@ class GitGameCmd(cmd.Cmd):
 
     def displayPlayerLocation(self, mapObject):
         location = self.player.location['location']
-        text = "You are located in the " + location + "\n"
+
+        text = S_BLU + '+'*SCREEN_WIDTH + '\n'
+        text += "    You are located in the " + S_CYA + location + S_BLU + '\n'
         text += "The adjacent rooms are :\n"
         for direction in ('north','east','south','west'):
             if self.map.move(direction,location) is not None:
-                text += direction + ": " + self.map.move(direction, location) + "\n"
+                text += direction + ": " + S_GRE + self.map.move(direction, location) + S_BLU + "\n"
+        text += S_BLU + '+'*SCREEN_WIDTH + S_WHI + '\n'
 
         return text
 
