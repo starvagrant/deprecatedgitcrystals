@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import unittest
-import recordable, character, cavemap, gitgame
+import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
     def test_recordable_reads(self):
@@ -139,18 +139,215 @@ class Tests(unittest.TestCase):
         roomText = "You are located in the Mountain Gate\n"
         roomText += "The adjacent rooms are :\n"
         roomText += "north: Git Crystal\n"
-        self.assertEqual(firstRoom, roomText)
+        self.assertEqual(firstRoom, """[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    You are located in the [36mMountain Gate[34m
+The adjacent rooms are :
+north: [32mGit Crystal[34m
+[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
+""")
 
         game.do_north('')
         secondRoom = game.displayPlayerLocation(worldMap)
-        roomText = "You are located in the Git Crystal\n"
-        roomText += "The adjacent rooms are :\n"
-        roomText += "north: Stalagmite Central\n"
-        roomText += "east: Mine Entrance\n"
-        roomText += "south: Mountain Gate\n"
-        roomText += "west: Wizard's Library\n"
-        self.assertEqual(secondRoom, roomText)
+        self.assertEqual(secondRoom, """[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    You are located in the [36mGit Crystal[34m
+The adjacent rooms are :
+north: [32mStalagmite Central[34m
+east: [32mMine Entrance[34m
+south: [32mMountain Gate[34m
+west: [32mWizard's Library[34m
+[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
+""")
 
         game.do_south('') # Reset to initial location
+
+    def test_git_status(self):
+        """ Test the git status command """
+        game = gitgame.GitGameCmd('mock-data')
+        game.do_status('')
+        self.assertEqual(game.statusMessage, """[34mRepository Status
+-----------------------------------------------------------------
+[32mStaging Area
+    Files:
+     game.json Staged File Changes
+
+[0m[31mUnstaged Changes
+    Files:
+     game.json Unstaged File Changes
+
+[0m""")
+
+    def test_git_diff(self):
+        repo = gamerepo.GitCmd('mock-data')
+
+        repo.do_diff('')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- old file: game.json in commit 21b4f39
+[32m+++ new file: game.json in unstaged changes
+
+[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "rooms":{
+[0m         "filename":"alive",
+""")
+
+        repo.do_diff('cached')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- old file: game.json in commit 21b4f39
+[32m+++ new file: game.json in staged changes
+
+[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "rooms":{
+[0m         "filename":"alive",
+""")
+
+        repo.do_diff('HEAD')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- old file: game.json in commit 21b4f39
+[32m+++ new file: game.json in working directory
+
+[0m     "alive":true,
+[0m     "inventory":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "rooms":{
+[0m         "filename":"alive",
+
+[0m             "west":"Impressive Caverns"
+[0m         }
+[0m     }
+[31m-}[0m[0m>
+\ No newline at end of file
+[32m+}
+[0m""")
+
+        repo.do_diff('staged HEAD~1')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- characters/alive.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/alive.json in staged changes
+
+[32m+{
+[0m[32m+    "alive":true
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/relationship.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/relationship.json in staged changes
+
+[32m+{
+[0m[32m+    "knows_player": false,
+[0m[32m+    "aware_of_presence": false,
+[0m[32m+    "hostility_level": 4
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/status.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/status.json in staged changes
+
+[32m+{
+[0m[32m+    "asleep":true
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- old file: game.json in commit a7c0de9
+[32m+++ new file: game.json in staged changes
+
+[0m     "alive":true,
+[0m     "inventory":{
+[0m         "filename":"alive",
+[31m-        "player":"alive"
+[0m[32m+        "player":"player"
+[0m[0m     },
+[0m     "player":{
+[0m         "filename":"alive",
+
+[0m             "west":"Impressive Caverns"
+[0m         }
+[0m     }
+[31m-}[0m[0m>
+\ No newline at end of file
+[32m+}
+[0m""")
+
+        repo.do_diff('HEAD~1 HEAD')
+        self.assertEqual(repo.fullDiff, """[0m=================================================================
+[31m--- characters/alive.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/alive.json in commit 21b4f39
+
+[32m+{
+[0m[32m+    "alive":true
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/relationship.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/relationship.json in commit 21b4f39
+
+[32m+{
+[0m[32m+    "knows_player": false,
+[0m[32m+    "aware_of_presence": false,
+[0m[32m+    "hostility_level": 4
+[0m[32m+}
+[0m[0m=================================================================
+[31m--- characters/status.jsondoes not exist in commit a7c0de9
+[32m+++ new file: characters/status.json in commit 21b4f39
+
+[32m+{
+[0m[32m+    "asleep":true
+[0m[32m+}
+[0m""")
+
+    def test_git_log(self):
+        """ Test the git log command """
+
+    def test_revparsing(self):
+        git = gamerepo.GitCmd('mock-data')
+        rev1 = git.revparse('HEAD')
+        rev2 = git.revparse('master')
+        rev3 = git.revparse('test')
+        rev5 = git.revparse('a7c0d')
+
+        self.assertEqual(rev1.hex[:7], '21b4f39')
+        self.assertEqual(rev2.hex[:7], '21b4f39')
+        self.assertEqual(rev3.hex[:7], '775c873')
+        self.assertEqual(rev5.hex[:7], 'a7c0de9')
+
+        with self.assertRaises(ValueError) as context1:
+            git.revparse('0df')
+
+        with self.assertRaises(ValueError) as context2:
+            git.revparse('eec655')
+
+        with self.assertRaises(ValueError) as context3:
+            git.revparse('fecfda')
+
+        with self.assertRaises(ValueError) as context4:
+            git.revparse('notabranch')
+
+        self.assertEqual(str(context1.exception), '0df: ambiguous lookup - OID prefix is too short')
+        self.assertEqual(str(context2.exception),'Object is not a commit.')
+        self.assertEqual(str(context3.exception),'Object is not a commit.')
+        self.assertEqual(str(context4.exception), "Value 'notabranch' does not refer to a git commit")
+
+    def test_statusparsing(self):
+        git = gamerepo.GitCmd('mock-data')
+        self.assertEqual(git.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
+        self.assertEqual(git.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
+        self.assertEqual(git.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
+
+        game = gitgame.GitGameCmd('mock-data')
+        self.assertEqual(game.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
+        self.assertEqual(game.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
+        self.assertEqual(game.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
 
 unittest.main()

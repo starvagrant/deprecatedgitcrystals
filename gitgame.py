@@ -2,13 +2,24 @@
 import cmd
 import recordable
 import cavemap,character
+import gamerepo
 
-class GitGameCmd(cmd.Cmd):
+SCREEN_WIDTH = 65
+S_RED = "\033[31m"
+S_ORA = "\033[33m"
+S_CYA = "\033[36m"
+S_GRE = "\033[32m"
+S_BLU = "\033[34m"
+S_PUR = "\033[35m"
+S_WHI = "\033[0m"
+
+class GitGameCmd(gamerepo.GitCmd):
+    prompt = '\n\033[0mGit Crystals> '
+
     def __init__(self, gamedir="saved-game"):
-        super().__init__()
+        super().__init__(gamedir)
 
         self.gamedir = gamedir
-        prompt = '\n Git Crystals> '
 
         # Player Data
         inventory = recordable.Recordable(gamedir, 'inventory')
@@ -29,27 +40,50 @@ class GitGameCmd(cmd.Cmd):
 
     def displayPlayerLocation(self, mapObject):
         location = self.player.location['location']
-        text = "You are located in the " + location + "\n"
+
+        text = S_BLU + '+'*SCREEN_WIDTH + '\n'
+        text += "    You are located in the " + S_CYA + location + S_BLU + '\n'
         text += "The adjacent rooms are :\n"
         for direction in ('north','east','south','west'):
             if self.map.move(direction,location) is not None:
-                text += direction + ": " + self.map.move(direction, location) + "\n"
+                text += direction + ": " + S_GRE + self.map.move(direction, location) + S_BLU + "\n"
+        text += S_BLU + '+'*SCREEN_WIDTH + S_WHI + '\n'
 
         return text
 
     def do_north(self, args):
+        """ Move Player Location North
+            Usage: 'north'
+            Additional Arguments: Game Ignores Input after north
+            File: this command alters the location.json file
+        """
         self.player.move('north', self.map)
         print(self.displayPlayerLocation(self.map))
 
     def do_south(self, args):
+        """ Move Player Location South
+    Usage: 'north'
+    Additional Arguments: Game Ignores Input after north
+    File: this command alters the location.json file
+        """
         self.player.move('south', self.map)
         print(self.displayPlayerLocation(self.map))
 
     def do_east(self, args):
+        """ Move Player Location East
+    Usage: 'east'
+    Additional Arguments: Game Ignores Input after north
+    File: this command alters the location.json file
+        """
         self.player.move('east', self.map)
         print(self.displayPlayerLocation(self.map))
 
     def do_west(self, args):
+        """ Move Player Location West
+    Usage: 'west'
+    Additional Arguments: Game Ignores Input after north
+    File: this command alters the location.json file
+            """
         self.player.move('west', self.map)
         print(self.displayPlayerLocation(self.map))
 
@@ -59,5 +93,7 @@ if __name__ == '__main__':
     print()
     print('(Type "help" for commands.)')
     print()
-    GitGameCmd().cmdloop()
+    game = GitGameCmd('saved-game')
+    print(game.displayPlayerLocation(game.map))
+    game.cmdloop()
     print('Thanks for playing!')
