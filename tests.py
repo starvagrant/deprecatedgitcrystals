@@ -1,9 +1,20 @@
 #!/usr/bin/python3
 
-import unittest
+import unittest,os, pygit2
 import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
+    def reset_repo(self):
+        repo = pygit2.Repository('mock-data/.git')
+        repo.checkout('HEAD', strategy = pygit2.GIT_CHECKOUT_FORCE)
+
+    def test_reset_repo(self):
+        """ Reset Changes to the Repo from Previous Testing """
+        self.reset_repo()
+
+        repo = pygit2.Repository('mock-data/.git')
+        self.assertEqual(repo.status(), {})
+
     def test_recordable_reads(self):
         """ I need to test that the recordable class properly reads files"""
         jsonFile = recordable.Recordable('mock-data')
@@ -28,6 +39,8 @@ class Tests(unittest.TestCase):
         """
 
     def test_player_character(self):
+        self.reset_repo()
+
         aliveJson = recordable.Recordable('mock-data', 'alive')
         statusJson = recordable.Recordable('mock-data', 'status')
         locationJson = recordable.Recordable('mock-data', 'location')
@@ -54,6 +67,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(testNonPlayer.isPlayer, False)
 
     def test_map_object(self):
+        self.reset_repo()
+
         """ Test Map Returns Correct Room"""
         roomJson = recordable.Recordable('mock-data', 'worldRooms')
         rooms = cavemap.Map(roomJson)
@@ -61,6 +76,8 @@ class Tests(unittest.TestCase):
 
     def test_character_movement(self):
         """ Test A Character moves, and the data of movement to disk """
+        self.reset_repo()
+
         locationJson = recordable.Recordable('mock-data', 'location')
         roomJson = recordable.Recordable('mock-data', 'worldRooms')
         recordables = [locationJson]
@@ -93,49 +110,37 @@ class Tests(unittest.TestCase):
 
     def test_game_movement(self):
         """ Test Command Line Movement """
+        self.reset_repo()
+
         game = gitgame.GitGameCmd('mock-data')
         locationJson = recordable.Recordable('mock-data', 'location')
-        roomJson = recordable.Recordable('mock-data', 'worldRooms')
-        recordables = [locationJson]
-        testPlayer = character.Character(recordables)
 
         game.do_north('')
         self.assertEqual(game.player.location['location'], "Git Crystal")
-
         game.do_east('')
         self.assertEqual(game.player.location['location'], "Mine Entrance")
 
         changedLocationJson = recordable.Recordable('mock-data', 'location')
-
         game.do_west('')
         game.do_south('')
-
         originalLocationJson = recordable.Recordable('mock-data','location')
-
         self.assertNotEqual(locationJson, changedLocationJson)
         self.assertEqual(locationJson, originalLocationJson)
 
     def test_invalid_move(self):
         """ Test that an invalid movement can't be made """
         game = gitgame.GitGameCmd('mock-data')
-        locationJson = recordable.Recordable('mock-data', 'location')
-        roomJson = recordable.Recordable('mock-data', 'worldRooms')
-        recordables = [locationJson]
-        testPlayer = character.Character(recordables)
 
         game.do_west('')
-        self.assertEqual(testPlayer.location['location'], "Mountain Gate") # Invalid move
+        self.assertEqual(game.player.location['location'], "Mountain Gate") # Invalid move
 
     def test_game_display(self):
         """ Test Game Room Display """
-        game = gitgame.GitGameCmd('mock-data')
-        locationJson = recordable.Recordable('mock-data', 'location')
-        roomJson = recordable.Recordable('mock-data', 'worldRooms')
-        recordables = [locationJson]
-        testPlayer = character.Character(recordables)
-        worldMap = game.map
+        self.reset_repo()
 
-        firstRoom = game.displayPlayerLocation(worldMap)
+        game = gitgame.GitGameCmd('mock-data')
+        firstRoom = game.displayPlayerLocation(game.map)
+
         roomText = "You are located in the Mountain Gate\n"
         roomText += "The adjacent rooms are :\n"
         roomText += "north: Git Crystal\n"
@@ -147,7 +152,7 @@ north: [32mGit Crystal[34m
 """)
 
         game.do_north('')
-        secondRoom = game.displayPlayerLocation(worldMap)
+        secondRoom = game.displayPlayerLocation(game.map)
         self.assertEqual(secondRoom, """[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     You are located in the [36mGit Crystal[34m
 The adjacent rooms are :
@@ -162,6 +167,13 @@ west: [32mWizard's Library[34m
 
     def test_git_status(self):
         """ Test the git status command """
+        repo = pygit2.Repository('mock-data/.git')
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        repo.index.add('game.json')
+        repo.index.write()
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
         game = gitgame.GitGameCmd('mock-data')
         game.do_status('')
         self.assertEqual(game.statusMessage, """[34mRepository Status
@@ -176,8 +188,10 @@ west: [32mWizard's Library[34m
 
 [0m""")
 
+        repo.checkout('HEAD', strategy=pygit2.GIT_CHECKOUT_FORCE)
+
     def test_git_diff(self):
-        repo = gamerepo.GitCmd('mock-data')
+        repo = gamerepo.GitCmd('mock-data2')
 
         repo.do_diff('')
         self.assertEqual(repo.fullDiff, """[0m=================================================================
@@ -339,7 +353,34 @@ west: [32mWizard's Library[34m
         self.assertEqual(str(context3.exception),'Object is not a commit.')
         self.assertEqual(str(context4.exception), "Value 'notabranch' does not refer to a git commit")
 
-    def test_statusparsing(self):
+    def test_statusparsing1(self):
+        """ Test statusParse Checking Active Changes """
+        self.reset_repo()
+        repo = pygit2.Repository('mock-data/.git')
+
+        status = repo.status()
+        self.assertEqual(status, {})
+
+        git = gamerepo.GitCmd('mock-data')
+
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        repo.index.add('game.json')
+        status = repo.status()
+        parsed = git.statusParse('game.json', status['game.json'])
+        self.assertEqual(parsed, {'name': 'game.json', 'status': ['Staged File Changes']})
+
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        status = repo.status()
+        parsed = git.statusParse('game.json', status['game.json'])
+        self.assertEqual(parsed, {'name': 'game.json', 'status':
+                            ['Unstaged File Changes','Staged File Changes', ]})
+
+        self.reset_repo()
+
+    def test_statusparsing2(self):
+        """ Test statusParse Theoretical States """
         git = gamerepo.GitCmd('mock-data')
         self.assertEqual(git.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
         self.assertEqual(git.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})

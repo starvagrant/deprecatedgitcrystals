@@ -2,11 +2,11 @@
     "alive":true,
     "inventory":{
         "filename":"alive",
-        "player":"player"
+        "player":"alive"
     },
     "player":{
         "filename":"alive",
-        "player":"player"
+        "player":"alive"
     },
     "rooms":{
         "filename":"alive",
