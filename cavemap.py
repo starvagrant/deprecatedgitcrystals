@@ -3,7 +3,11 @@ import recordable
 class Map:
     def __init__(self, mapRecordable):
 
-        self.data = mapRecordable.load()
+        self.file = mapRecordable
+        self.data = self.file.load()
+
+    def load(self):
+        self.data = self.file.load()
 
     def move(self, direction, location):
         """ Return the new location when a character moves,
