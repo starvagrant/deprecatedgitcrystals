@@ -18,8 +18,8 @@ class GitGameCmd(gamerepo.GitCmd):
 
     def __init__(self, gamedir="saved-game"):
         super().__init__(gamedir)
-
         self.gamedir = gamedir
+        self.isOver = False
 
         # Player Data
         inventory = recordable.Recordable(gamedir, 'inventory')
@@ -31,12 +31,26 @@ class GitGameCmd(gamerepo.GitCmd):
         # Player Variable
         self.player = character.Character(playerRecordables)
 
+        # Game State
+        if self.player.alive == True:
+            self.isOver == False
+        else:
+            self.isOver == True
+
         # Map
         worldMap = recordable.Recordable(gamedir, 'worldRooms')
         self.map = cavemap.Map(worldMap)
 
     def default(self, args):
         print("I do not understand that command. Type help for a list of commands.")
+
+    def postcmd(self, stop, line):
+        """Hook method executed just after a command dispatch is finished."""
+        if self.player.alive['alive'] == False:
+            print(S_RED + "You are dead")
+            print(S_RED + "Your remains are in " + S_CYA + self.player.location['location'] + S_WHI)
+            return True                         # End Loop
+        return stop
 
     def displayPlayerLocation(self, mapObject):
         location = self.player.location['location']

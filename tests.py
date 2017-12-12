@@ -386,9 +386,24 @@ west: [32mWizard's Library[34m
         self.assertEqual(git.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
         self.assertEqual(git.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
 
+    def test_check_dangers(self):
+        # Test Method on Map Object
+        roomsJson = recordable.Recordable('mock-data', 'worldRooms')
+        rooms = cavemap.Map(roomsJson)
+        danger = rooms.getDanger('Bottomless Pit')
+        self.assertEqual(danger, {'entry':'floating'})
         game = gitgame.GitGameCmd('mock-data')
-        self.assertEqual(game.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
-        self.assertEqual(game.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
-        self.assertEqual(game.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
+        game.do_north('')
+        game.do_north('')
+        game.do_west('')
+        game.do_west('')    # Enter Bottomless Pit
+        alive = game.player.alive
+        status = game.player.status
+        self.assertTrue(status['floating'])
+        self.assertFalse(alive['alive'])
+        self.assertTrue(game.postcmd('','')) # True Exits The Game Playing Loop
+
+        self.reset_repo()
+
 
 unittest.main()
