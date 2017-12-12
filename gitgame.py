@@ -65,6 +65,7 @@ class GitGameCmd(gamerepo.GitCmd):
 
         return text
 
+
     def do_north(self, args):
         """ Move Player Location North
             Usage: 'north'

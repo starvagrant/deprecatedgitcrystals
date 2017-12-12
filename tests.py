@@ -167,6 +167,7 @@ west: [32mWizard's Library[34m
 
     def test_git_status(self):
         """ Test the git status command """
+        self.reset_repo()
         repo = pygit2.Repository('mock-data/.git')
         with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
             f.write('#comment')
@@ -326,8 +327,8 @@ west: [32mWizard's Library[34m
 
     def test_revparsing(self):
         git = gamerepo.GitCmd('mock-data')
-        rev1 = git.revparse('HEAD')
-        rev2 = git.revparse('master')
+        rev1 = git.revparse('HEAD~1')
+        rev2 = git.revparse('revparse')
         rev3 = git.revparse('test')
         rev5 = git.revparse('a7c0d')
 
