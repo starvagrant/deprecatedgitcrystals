@@ -1,9 +1,20 @@
 #!/usr/bin/python3
 
-import unittest
+import unittest,os, pygit2
 import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
+    def reset_repo(self):
+        repo = pygit2.Repository('mock-data/.git')
+        repo.checkout('HEAD', strategy = pygit2.GIT_CHECKOUT_FORCE)
+
+    def test_reset_repo(self):
+        """ Reset Changes to the Repo from Previous Testing """
+        self.reset_repo()
+
+        repo = pygit2.Repository('mock-data/.git')
+        self.assertEqual(repo.status(), {})
+
     def test_recordable_reads(self):
         """ I need to test that the recordable class properly reads files"""
         jsonFile = recordable.Recordable('mock-data')
@@ -28,6 +39,8 @@ class Tests(unittest.TestCase):
         """
 
     def test_player_character(self):
+        self.reset_repo()
+
         aliveJson = recordable.Recordable('mock-data', 'alive')
         statusJson = recordable.Recordable('mock-data', 'status')
         locationJson = recordable.Recordable('mock-data', 'location')
@@ -54,6 +67,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(testNonPlayer.isPlayer, False)
 
     def test_map_object(self):
+        self.reset_repo()
+
         """ Test Map Returns Correct Room"""
         roomJson = recordable.Recordable('mock-data', 'worldRooms')
         rooms = cavemap.Map(roomJson)
@@ -61,6 +76,8 @@ class Tests(unittest.TestCase):
 
     def test_character_movement(self):
         """ Test A Character moves, and the data of movement to disk """
+        self.reset_repo()
+
         locationJson = recordable.Recordable('mock-data', 'location')
         roomJson = recordable.Recordable('mock-data', 'worldRooms')
         recordables = [locationJson]
@@ -93,6 +110,8 @@ class Tests(unittest.TestCase):
 
     def test_game_movement(self):
         """ Test Command Line Movement """
+        self.reset_repo()
+
         game = gitgame.GitGameCmd('mock-data')
         locationJson = recordable.Recordable('mock-data', 'location')
         roomJson = recordable.Recordable('mock-data', 'worldRooms')
@@ -128,6 +147,8 @@ class Tests(unittest.TestCase):
 
     def test_game_display(self):
         """ Test Game Room Display """
+        self.reset_repo()
+
         game = gitgame.GitGameCmd('mock-data')
         locationJson = recordable.Recordable('mock-data', 'location')
         roomJson = recordable.Recordable('mock-data', 'worldRooms')
