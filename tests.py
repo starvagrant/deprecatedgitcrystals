@@ -114,49 +114,33 @@ class Tests(unittest.TestCase):
 
         game = gitgame.GitGameCmd('mock-data')
         locationJson = recordable.Recordable('mock-data', 'location')
-        roomJson = recordable.Recordable('mock-data', 'worldRooms')
-        recordables = [locationJson]
-        testPlayer = character.Character(recordables)
 
         game.do_north('')
         self.assertEqual(game.player.location['location'], "Git Crystal")
-
         game.do_east('')
         self.assertEqual(game.player.location['location'], "Mine Entrance")
 
         changedLocationJson = recordable.Recordable('mock-data', 'location')
-
         game.do_west('')
         game.do_south('')
-
         originalLocationJson = recordable.Recordable('mock-data','location')
-
         self.assertNotEqual(locationJson, changedLocationJson)
         self.assertEqual(locationJson, originalLocationJson)
 
     def test_invalid_move(self):
         """ Test that an invalid movement can't be made """
         game = gitgame.GitGameCmd('mock-data')
-        locationJson = recordable.Recordable('mock-data', 'location')
-        roomJson = recordable.Recordable('mock-data', 'worldRooms')
-        recordables = [locationJson]
-        testPlayer = character.Character(recordables)
 
         game.do_west('')
-        self.assertEqual(testPlayer.location['location'], "Mountain Gate") # Invalid move
+        self.assertEqual(game.player.location['location'], "Mountain Gate") # Invalid move
 
     def test_game_display(self):
         """ Test Game Room Display """
         self.reset_repo()
 
         game = gitgame.GitGameCmd('mock-data')
-        locationJson = recordable.Recordable('mock-data', 'location')
-        roomJson = recordable.Recordable('mock-data', 'worldRooms')
-        recordables = [locationJson]
-        testPlayer = character.Character(recordables)
-        worldMap = game.map
+        firstRoom = game.displayPlayerLocation(game.map)
 
-        firstRoom = game.displayPlayerLocation(worldMap)
         roomText = "You are located in the Mountain Gate\n"
         roomText += "The adjacent rooms are :\n"
         roomText += "north: Git Crystal\n"
@@ -168,7 +152,7 @@ north: [32mGit Crystal[34m
 """)
 
         game.do_north('')
-        secondRoom = game.displayPlayerLocation(worldMap)
+        secondRoom = game.displayPlayerLocation(game.map)
         self.assertEqual(secondRoom, """[34m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     You are located in the [36mGit Crystal[34m
 The adjacent rooms are :
