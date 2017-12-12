@@ -183,6 +183,13 @@ west: [32mWizard's Library[34m
 
     def test_git_status(self):
         """ Test the git status command """
+        repo = pygit2.Repository('mock-data/.git')
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        repo.index.add('game.json')
+        repo.index.write()
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
         game = gitgame.GitGameCmd('mock-data')
         game.do_status('')
         self.assertEqual(game.statusMessage, """[34mRepository Status
@@ -196,6 +203,8 @@ west: [32mWizard's Library[34m
      game.json Unstaged File Changes
 
 [0m""")
+
+        repo.checkout('HEAD', strategy=pygit2.GIT_CHECKOUT_FORCE)
 
     def test_git_diff(self):
         repo = gamerepo.GitCmd('mock-data')
