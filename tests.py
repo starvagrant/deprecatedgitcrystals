@@ -369,7 +369,34 @@ west: [32mWizard's Library[34m
         self.assertEqual(str(context3.exception),'Object is not a commit.')
         self.assertEqual(str(context4.exception), "Value 'notabranch' does not refer to a git commit")
 
-    def test_statusparsing(self):
+    def test_statusparsing1(self):
+        """ Test statusParse Checking Active Changes """
+        self.reset_repo()
+        repo = pygit2.Repository('mock-data/.git')
+
+        status = repo.status()
+        self.assertEqual(status, {})
+
+        git = gamerepo.GitCmd('mock-data')
+
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        repo.index.add('game.json')
+        status = repo.status()
+        parsed = git.statusParse('game.json', status['game.json'])
+        self.assertEqual(parsed, {'name': 'game.json', 'status': ['Staged File Changes']})
+
+        with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        status = repo.status()
+        parsed = git.statusParse('game.json', status['game.json'])
+        self.assertEqual(parsed, {'name': 'game.json', 'status':
+                            ['Unstaged File Changes','Staged File Changes', ]})
+
+        self.reset_repo()
+
+    def test_statusparsing2(self):
+        """ Test statusParse Theoretical States """
         git = gamerepo.GitCmd('mock-data')
         self.assertEqual(git.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
         self.assertEqual(git.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
