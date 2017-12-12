@@ -1,8 +1,8 @@
 {
     "Abandoned Treasury":{
-        "danger":[
-            "Search"
-        ],
+        "danger":{
+            "search":"beheaded"
+        },
         "desc":"An Abandoned Treasury Lies Before You. The room glitters and is full of treasure chests. Something smells of smoke",
         "east":"Dragon's Lair",
         "ground":[
@@ -29,9 +29,9 @@
         "north":"Mine Entrance"
     },
     "Bottomless Pit":{
-        "danger":[
-            "Entry"
-        ],
+        "danger":{
+            "entry":"floating"
+        },
         "desc":"Before you lies a hole from which no light escapes",
         "east":"Alchemist Lab",
         "ground":[
@@ -40,9 +40,9 @@
         "west":"Bottomless Pit"
     },
     "Dragon's Lair":{
-        "danger":[
-            "Noise"
-        ],
+        "danger":{
+            "noise":"incinerated"
+        },
         "desc":"The following room contains enough gold to rule ten kingdoms. The dragon protecting it has not killed you yet. Perhaps it is sleeping",
         "ground":[
             "Sword",
@@ -81,9 +81,9 @@
         "west":"Git Crystal"
     },
     "Mines":{
-        "danger":[
-            "Search"
-        ],
+        "danger":{
+            "search":"dusty"
+        },
         "desc":"A labyrinth of passageways and abandoned mine equipment in good condition confront you",
         "ground":[
             "Saltpeter"
