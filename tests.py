@@ -207,7 +207,7 @@ west: [32mWizard's Library[34m
         repo.checkout('HEAD', strategy=pygit2.GIT_CHECKOUT_FORCE)
 
     def test_git_diff(self):
-        repo = gamerepo.GitCmd('mock-data')
+        repo = gamerepo.GitCmd('mock-data2')
 
         repo.do_diff('')
         self.assertEqual(repo.fullDiff, """[0m=================================================================
