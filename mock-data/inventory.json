@@ -1,14 +1,14 @@
 {
-    "weapons": [
-        "Unarmed"
+    "armor":[
+        "Basic Clothes"
     ],
-    "gems": [
+    "gems":[
         "Git Gem"
     ],
-    "items": [
+    "items":[
         "Distress Note"
     ],
-    "armor": [
-        "Basic Clothes"
+    "weapons":[
+        "Unarmed"
     ]
 }
