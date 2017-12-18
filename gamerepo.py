@@ -187,7 +187,7 @@ class GitCmd(cmd.Cmd):
                 before = "commit " + self.revparse('HEAD').hex[:7]
                 after = "unstaged changes"
             elif commits[0] == 'cached' or commits[0] == 'staged' and len(commits) < 2:
-                diff = self.repo.diff(cached=True)
+                diff = self.repo.diff('HEAD', cached=True)
                 before = "commit " + self.revparse('HEAD').hex[:7]
                 after = "staged changes"
             elif commits[0] == 'cached' or commits[0] == 'staged' and isinstance(commits[1], pygit2.Commit):

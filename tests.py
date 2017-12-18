@@ -214,15 +214,22 @@ west: [32mWizard's Library[34m
 [31m--- old file: game.json in commit 21b4f39
 [32m+++ new file: game.json in staged changes
 
-[0m     },
-[0m     "player":{
+[0m     "alive":true,
+[0m     "inventory":{
 [0m         "filename":"alive",
 [31m-        "player":"alive"
 [0m[32m+        "player":"player"
 [0m[0m     },
-[0m     "rooms":{
+[0m     "player":{
 [0m         "filename":"alive",
-""")
+
+[0m             "west":"Impressive Caverns"
+[0m         }
+[0m     }
+[31m-}[0m[0m>
+\ No newline at end of file
+[32m+}
+[0m""")
 
         repo.do_diff('HEAD')
         self.assertEqual(repo.fullDiff, """[0m=================================================================
