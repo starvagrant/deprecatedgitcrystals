@@ -435,5 +435,33 @@ west: [32mWizard's Library[34m
 
         self.reset_repo()
 
+    def test_file_unstage(self):
+
+        self.reset_repo()
+        game = gitgame.GitGameCmd('mock-data')
+        with open(os.path.join(game.repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+
+        with open(os.path.join(game.repo.workdir, 'base.json'), 'a') as f:
+            f.write('#comment')
+        game.do_stage('game.json')
+        game.do_stage('base.json')
+        status = game.repo.status()
+        parsed1 = game.statusParse('game.json', status['game.json'])
+        parsed2 = game.statusParse('base.json', status['base.json'])
+        self.assertEqual(parsed1, {'name': 'game.json', 'status': ['Staged File Changes']})
+        self.assertEqual(parsed2, {'name': 'base.json', 'status': ['Staged File Changes']})
+
+        game.do_unstage('')
+
+        status = game.repo.status()
+        parsed1 = game.statusParse('game.json', status['game.json'])
+        parsed2 = game.statusParse('base.json', status['base.json'])
+        self.assertEqual(parsed1, {'name': 'game.json', 'status': ['Unstaged File Changes']})
+        self.assertEqual(parsed2, {'name': 'base.json', 'status': ['Unstaged File Changes']})
+
+        self.reset_repo()
+
+
 
 unittest.main()

@@ -141,6 +141,16 @@ Type ls to see a list of all game files
 
         print(self.stageMessage)
 
+    def do_unstage(self, arg):
+        self.unstageMessage = "All changes removed from staging area\n"
+        self.unstageMessage += "Type" + S_CYA + "stage <file name> " + S_WHI + "\n"
+        self.unstageMessage += "to stage changes for commit.\n"
+
+        HEAD = self.repo.revparse_single('HEAD').hex
+        print(HEAD)
+        self.repo.reset(HEAD, pygit2.GIT_RESET_MIXED)
+        print(self.unstageMessage)
+
     def do_status(self, arg):
         """
         GIT_STATUS_CURRENT = 0
