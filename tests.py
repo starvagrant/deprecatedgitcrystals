@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import unittest,os, pygit2
+import unittest, os, pygit2
 import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
@@ -410,6 +410,28 @@ west: [32mWizard's Library[34m
         self.assertTrue(status['floating'])
         self.assertFalse(alive['alive'])
         self.assertTrue(game.postcmd('','')) # True Exits The Game Playing Loop
+
+        self.reset_repo()
+
+    def test_file_check(self):
+
+        fileName1 = os.pardir + os.sep
+        fileName2 = "mock-data"
+        fileName3 = "fileisnthere.cxx"
+        GitCmd = gamerepo.GitCmd('mock-data')
+        self.assertFalse(GitCmd.fileIsValid(fileName1))
+        self.assertTrue(GitCmd.fileIsValid(fileName2))
+        self.assertFalse(GitCmd.fileIsValid(fileName3))
+
+    def test_file_stage(self):
+        self.reset_repo()
+        game = gitgame.GitGameCmd('mock-data')
+        with open(os.path.join(game.repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        game.do_stage('game.json')
+        status = game.repo.status()
+        parsed = game.statusParse('game.json', status['game.json'])
+        self.assertEqual(parsed, {'name': 'game.json', 'status': ['Staged File Changes']})
 
         self.reset_repo()
 

@@ -99,10 +99,47 @@ class GitCmd(cmd.Cmd):
 
         return status
 
+    def fileIsValid(self,fileName):
+        invalid = os.pardir # strings with parent directories considered invalid
+        if isinstance(fileName,str):
+            if fileName.find(invalid) is not -1:
+                return False
+            else:
+                try:
+                    x = os.stat(fileName)   # Test File Exists
+                except FileNotFoundError:
+                    return False
+            return True
+
     # A very simple "quit" command to terminate the program:
     def do_quit(self, arg):
         """Quit the game."""
         return True # this exits the Cmd application loop in TextAdventureCmd.cmdloop()
+
+    def do_stage(self, arg):
+        self.stageMessage = ""
+        args = arg.split()
+        if len(args) == 0:
+            self.stageMessage += """Type the file name you wish to stage:
+stage <file name>
+Type status to see a list of changed files
+Type ls to see a list of all game files
+"""
+
+        if len(args) > 0:
+            for fileName in args:
+                absFilePath = os.path.join(self.repo.workdir, fileName)
+                if self.fileIsValid(absFilePath):
+                   self.repo.index.add(fileName)
+                   self.repo.index.write()
+                   self.stageMessage += S_ORA + fileName + "added to staging area " + S_WHI + '\n'
+                else:
+                   self.stageMessage += S_RED + fileName + 'is not in the repository' + S_WHI + '\n'
+            self.stageMessage += S_WHI + "Type " + S_CYA + "status" + S_WHI + "to inspect staging area" + '\n'
+            self.stageMessage += S_WHI + "Type " + S_CYA + "diff staged" + S_WHI + "to inspect staged changes" + '\n'
+            self.stageMessage += S_WHI + "Type " + S_CYA + "commit" + S_WHI + "to commit changes" + '\n'
+
+        print(self.stageMessage)
 
     def do_status(self, arg):
         """
