@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import unittest,os, pygit2
 import recordable, character, cavemap, gitgame, gamerepo
