@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import cmd
+import cmd,os
 import pygit2
 
 SCREEN_WIDTH = 65
@@ -19,8 +19,7 @@ class GitCmd(cmd.Cmd):
     def __init__(self, repodir="saved-game"):
         super().__init__()
 
-        self.gamedir = repodir
-        repoName = repodir + '/.git'
+        repoName = repodir + os.sep + '.git'
         self.repo = pygit2.Repository(repoName)
         self.currentMessage = ''
 
