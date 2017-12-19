@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import cmd,os
+import cmd,os,re
 import pygit2
 
 SCREEN_WIDTH = 65
@@ -22,6 +22,10 @@ class GitCmd(cmd.Cmd):
         repoName = repodir + os.sep + '.git'
         self.repo = pygit2.Repository(repoName)
         self.currentMessage = ''
+        if 'user.name' not in self.repo.config:
+            self.repo.config['user.name'] = "Adventurer"
+        if 'user.email' not in self.repo.config:
+            self.repo.config['user.email'] = "adventurer@gitcrystals.com"
 
     def default(self, arg):
         print('I do not understand that command. Type "help" for a list of commands.')
@@ -115,6 +119,20 @@ class GitCmd(cmd.Cmd):
     def do_quit(self, arg):
         """Quit the game."""
         return True # this exits the Cmd application loop in TextAdventureCmd.cmdloop()
+
+    def do_setname(self, arg):
+        """ Set the commit author's name """
+        self.repo.config['user.name'] = arg
+        print("Your name is set to " + arg + '\n')
+
+    def do_setemail(self, arg):
+        """ Set the commit author's email """
+        match = re.fullmatch('[A-Za-z0-9_-]+@[A-Za-z0-9_-]+\.[a-z.]{2,9}', arg)
+        if match is not None:
+            self.repo.config['user.email'] = arg
+            print(self.repo.config['user.email'] + " is set to " + arg)
+        else:
+            print("Please input a valid email address such as example@gitcrystals.com")
 
     def do_stage(self, arg):
         self.stageMessage = ""

@@ -462,6 +462,18 @@ west: [32mWizard's Library[34m
 
         self.reset_repo()
 
+    def test_gitconfig_identity(self):
+        """ Test that one can change identifying information via commandline"""
+
+        game = gitgame.GitGameCmd('mock-data')
+        game.do_setname('Aaron Ginns')
+        game.do_setemail('yoyoyo@aol.com')
+
+        self.assertEqual(game.repo.config['user.name'], 'Aaron Ginns')
+        self.assertEqual(game.repo.config['user.email'], 'yoyoyo@aol.com')
+
+        game.do_setemail('invalidurl')  # invalid email
+        self.assertEqual(game.repo.config['user.email'], 'yoyoyo@aol.com')
 
 
 unittest.main()
