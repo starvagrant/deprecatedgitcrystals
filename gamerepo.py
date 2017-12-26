@@ -19,8 +19,8 @@ class GitCmd(cmd.Cmd):
     def __init__(self, repodir="saved-game"):
         super().__init__()
 
-        repoName = repodir + os.sep + '.git'
-        self.repo = pygit2.Repository(repoName)
+        self.repoName = repodir + os.sep + '.git'
+        self.repo = pygit2.Repository(self.repoName)
         self.currentMessage = ''
         if 'user.name' not in self.repo.config:
             self.repo.config['user.name'] = "Adventurer"

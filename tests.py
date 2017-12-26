@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-import unittest, os, pygit2
+import unittest, os, pygit2,re
 import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
     def reset_repo(self):
         repo = pygit2.Repository('mock-data/.git')
-        repo.checkout('HEAD', strategy = pygit2.GIT_CHECKOUT_FORCE)
+        ref = 'f2c99318083a7bc0099679020c84199677b614ce'
+        repo.reset(ref,pygit2.GIT_RESET_HARD)
 
     def test_reset_repo(self):
         """ Reset Changes to the Repo from Previous Testing """
