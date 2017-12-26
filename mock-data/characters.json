@@ -1,26 +1,26 @@
 {
-    "princess": {
-        "asleep": true,
-        "in_love": false,
-        "alive": true,
-        "captured": true
+    "alchemist":{
+        "alive":true,
+        "asleep":false,
+        "captured":false,
+        "in_love":false
     },
-    "grandfather": {
-        "asleep": false,
-        "in_love": false,
-        "alive": true,
-        "captured": true
+    "dragon":{
+        "alive":true,
+        "asleep":true,
+        "captured":false,
+        "in_love":false
     },
-    "dragon": {
-        "asleep": true,
-        "in_love": false,
-        "alive": true,
-        "captured": false
+    "grandfather":{
+        "alive":true,
+        "asleep":false,
+        "captured":true,
+        "in_love":false
     },
-    "alchemist": {
-        "asleep": false,
-        "in_love": false,
-        "alive": true,
-        "captured": false
+    "princess":{
+        "alive":true,
+        "asleep":true,
+        "captured":true,
+        "in_love":false
     }
 }

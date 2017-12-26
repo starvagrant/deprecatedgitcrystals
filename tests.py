@@ -1,12 +1,13 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
-import unittest,os, pygit2
+import unittest, os, pygit2,re
 import recordable, character, cavemap, gitgame, gamerepo
 
 class Tests(unittest.TestCase):
     def reset_repo(self):
         repo = pygit2.Repository('mock-data/.git')
-        repo.checkout('HEAD', strategy = pygit2.GIT_CHECKOUT_FORCE)
+        ref = 'f2c99318083a7bc0099679020c84199677b614ce'
+        repo.reset(ref,pygit2.GIT_RESET_HARD)
 
     def test_reset_repo(self):
         """ Reset Changes to the Repo from Previous Testing """
@@ -167,6 +168,7 @@ west: [32mWizard's Library[34m
 
     def test_git_status(self):
         """ Test the git status command """
+        self.reset_repo()
         repo = pygit2.Repository('mock-data/.git')
         with open(os.path.join(repo.workdir, 'game.json'), 'a') as f:
             f.write('#comment')
@@ -213,15 +215,22 @@ west: [32mWizard's Library[34m
 [31m--- old file: game.json in commit 21b4f39
 [32m+++ new file: game.json in staged changes
 
-[0m     },
-[0m     "player":{
+[0m     "alive":true,
+[0m     "inventory":{
 [0m         "filename":"alive",
 [31m-        "player":"alive"
 [0m[32m+        "player":"player"
 [0m[0m     },
-[0m     "rooms":{
+[0m     "player":{
 [0m         "filename":"alive",
-""")
+
+[0m             "west":"Impressive Caverns"
+[0m         }
+[0m     }
+[31m-}[0m[0m>
+\ No newline at end of file
+[32m+}
+[0m""")
 
         repo.do_diff('HEAD')
         self.assertEqual(repo.fullDiff, """[0m=================================================================
@@ -326,8 +335,8 @@ west: [32mWizard's Library[34m
 
     def test_revparsing(self):
         git = gamerepo.GitCmd('mock-data')
-        rev1 = git.revparse('HEAD')
-        rev2 = git.revparse('master')
+        rev1 = git.revparse('HEAD~2')
+        rev2 = git.revparse('revparse')
         rev3 = git.revparse('test')
         rev5 = git.revparse('a7c0d')
 
@@ -386,9 +395,121 @@ west: [32mWizard's Library[34m
         self.assertEqual(git.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
         self.assertEqual(git.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
 
+    def test_check_dangers(self):
+        self.reset_repo()
+        # Test Method on Map Object
+        roomsJson = recordable.Recordable('mock-data', 'worldRooms')
+        rooms = cavemap.Map(roomsJson)
+        danger = rooms.getDanger('Bottomless Pit')
+        self.assertEqual(danger, {'entry':'floating'})
         game = gitgame.GitGameCmd('mock-data')
-        self.assertEqual(game.statusParse('staged_modified', 258), {'name': 'staged_modified', 'status':['Unstaged File Changes','Staged File Changes']})
-        self.assertEqual(game.statusParse('ignored', 16384), {'name': 'ignored', 'status': ['Ignored']})
-        self.assertEqual(game.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
+        game.do_north('')
+        game.do_north('')
+        game.do_west('')
+        game.do_west('')    # Enter Bottomless Pit
+        alive = game.player.alive
+        status = game.player.status
+        self.assertTrue(status['floating'])
+        self.assertFalse(alive['alive'])
+        self.assertTrue(game.postcmd('','')) # True Exits The Game Playing Loop
+
+        self.reset_repo()
+
+    def test_file_check(self):
+
+        fileName1 = os.pardir + os.sep
+        fileName2 = "mock-data"
+        fileName3 = "fileisnthere.cxx"
+        GitCmd = gamerepo.GitCmd('mock-data')
+        self.assertFalse(GitCmd.fileIsValid(fileName1))
+        self.assertTrue(GitCmd.fileIsValid(fileName2))
+        self.assertFalse(GitCmd.fileIsValid(fileName3))
+
+    def test_file_stage(self):
+        self.reset_repo()
+        game = gitgame.GitGameCmd('mock-data')
+        with open(os.path.join(game.repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+        game.do_stage('game.json')
+        status = game.repo.status()
+        parsed = game.statusParse('game.json', status['game.json'])
+        self.assertEqual(parsed, {'name': 'game.json', 'status': ['Staged File Changes']})
+
+        self.reset_repo()
+
+    def test_file_unstage(self):
+
+        self.reset_repo()
+        game = gitgame.GitGameCmd('mock-data')
+        with open(os.path.join(game.repo.workdir, 'game.json'), 'a') as f:
+            f.write('#comment')
+
+        with open(os.path.join(game.repo.workdir, 'base.json'), 'a') as f:
+            f.write('#comment')
+        game.do_stage('game.json')
+        game.do_stage('base.json')
+        status = game.repo.status()
+        parsed1 = game.statusParse('game.json', status['game.json'])
+        parsed2 = game.statusParse('base.json', status['base.json'])
+        self.assertEqual(parsed1, {'name': 'game.json', 'status': ['Staged File Changes']})
+        self.assertEqual(parsed2, {'name': 'base.json', 'status': ['Staged File Changes']})
+
+        game.do_unstage('')
+
+        status = game.repo.status()
+        parsed1 = game.statusParse('game.json', status['game.json'])
+        parsed2 = game.statusParse('base.json', status['base.json'])
+        self.assertEqual(parsed1, {'name': 'game.json', 'status': ['Unstaged File Changes']})
+        self.assertEqual(parsed2, {'name': 'base.json', 'status': ['Unstaged File Changes']})
+
+        self.reset_repo()
+
+    def test_gitconfig_identity(self):
+        """ Test that one can change identifying information via commandline"""
+
+        game = gitgame.GitGameCmd('mock-data')
+        game.do_setname('Aaron Ginns')
+        game.do_setemail('yoyoyo@aol.com')
+
+        self.assertEqual(game.repo.config['user.name'], 'Aaron Ginns')
+        self.assertEqual(game.repo.config['user.email'], 'yoyoyo@aol.com')
+
+        game.do_setemail('invalidurl')  # invalid email
+        self.assertEqual(game.repo.config['user.email'], 'yoyoyo@aol.com')
+
+    def test_createSignature(self):
+        """ Test internal createSignature Method """
+        game = gitgame.GitGameCmd('mock-data')
+        signature = game.createSignature()
+        self.assertTrue(isinstance(signature, pygit2.Signature))
+
+    def test_checkCanCommit(self):
+        """ Test User Provided Pre-commit Message """
+        self.reset_repo()
+        game = gitgame.GitGameCmd('mock-data')
+        self.assertFalse(game.checkCanCommit()) # No changes
+        game.do_north('')
+        self.assertFalse(game.checkCanCommit()) # No staged changes
+        game.do_stage('location.json')
+        self.assertTrue(game.checkCanCommit())
+
+        # Note: writing this test involves both provided command line input
+        # And doing a git reset on the tested repo.
+    def test_gitCommit(self):
+        """ Test Commit Created Properly """
+        game = gitgame.GitGameCmd('mock-data')
+        game.do_north('')
+        game.do_stage('location.json')
+        game.do_commit('test')
+
+        postCommitMessage = game.printPostCommitInfo(game.repo.head,game.commit)
+        match = re.match("New Commit.*[a-f0-9]{8}.*Added to repo\nBranch.*Updated", postCommitMessage,re.M)
+
+        originalCommit = game.repo.revparse_single('HEAD~1')
+        game.repo.reset(originalCommit.hex, pygit2.GIT_RESET_HARD)
+
+    def test_user_commit_message(self):
+        """ Will test when I figure out how to test user input """
+        a = "No Test"
 
 unittest.main()

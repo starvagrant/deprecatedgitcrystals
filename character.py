@@ -7,26 +7,39 @@ class Character(object):
         for jsonFile in self.recordables:
             if jsonFile.name == "inventory":
                 self.inventory = jsonFile.data
+                self.inventoryFile = jsonFile
             if jsonFile.name == "alive":
                 self.alive = jsonFile.data
+                self.aliveFile = jsonFile
+                self.playerIsAlive = self.aliveFile.data['alive']
             if jsonFile.name == "status":
                 self.status = jsonFile.data
+                self.statusFile = jsonFile
             if jsonFile.name == "location":
                 self.location = jsonFile.data
+                self.locationFile = jsonFile
             if jsonFile.name == "relationship":
                 self.relationship = jsonFile.data
+                self.relationshipFile = jsonFile
                 self.isPlayer = False
 
     def move(self, direction, mapObject):
         movement = direction.lower()
         if movement in ["north","south","east","west"]:
             if mapObject.move(movement, self.location['location']) is not None:
-                self.location['location'] = mapObject.move(movement, self.location['location'])
-                for jsonFile in self.recordables:
-                    if jsonFile.name == "location":
-                        jsonFile.data['location'] = self.location['location']
-                        jsonFile.write()
+                self.locationFile.data['location'] = mapObject.move(movement, self.location['location'])
+                self.locationFile.write()
 
-    def checkLocation(self):
+                self.checkLocation(mapObject)
+                if self.inDangerOf:                         # Check is Not None
+                    if 'entry' in self.inDangerOf.keys():
+                        status = self.inDangerOf['entry']
+                        self.statusFile.data[status] = True
+                        self.statusFile.write()
+                        self.aliveFile.data['alive'] = False
+                        self.aliveFile.write()
+                        self.playerIsAlive = False
+
+    def checkLocation(self, mapObject):
         """ check to see location has traps """
-        return
+        self.inDangerOf = mapObject.getDanger(self.location['location'])
