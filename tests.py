@@ -494,6 +494,21 @@ west: [32mWizard's Library[34m
 
         # Note: writing this test involves both provided command line input
         # And doing a git reset on the tested repo.
+    def test_gitCommit(self):
+        """ Test Commit Created Properly """
+        game = gitgame.GitGameCmd('mock-data')
+        game.do_north('')
+        game.do_stage('location.json')
+        game.do_commit('test')
+
+        postCommitMessage = game.printPostCommitInfo(game.repo.head,game.commit)
+        match = re.match("New Commit.*[a-f0-9]{8}.*Added to repo\nBranch.*Updated", postCommitMessage,re.M)
+
+        originalCommit = game.repo.revparse_single('HEAD~1')
+        game.repo.reset(originalCommit.hex, pygit2.GIT_RESET_HARD)
+
+    def test_user_commit_message(self):
+        """ Will test when I figure out how to test user input """
         a = "No Test"
 
 unittest.main()

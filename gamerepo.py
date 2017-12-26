@@ -213,6 +213,31 @@ Type ls to see a list of all game files
         self.repo.reset(HEAD, pygit2.GIT_RESET_MIXED)
         print(self.unstageMessage)
 
+    def do_commit(self, arg):
+        """ Command to Let User Commit Changes """
+
+        if self.checkCanCommit() == False:
+            self.message = """ You haven't staged any changes for commit
+Type stage """ + S_CYA + """<filename>""" + S_WHI + """where filename is
+the name of the file whose changes you wish to commit"""
+            print(self.message)
+            return
+
+        if self.repoName == "mock-data" + os.sep + ".git" and arg =='test': # For Unit Tests
+            message = "Test Commit Message"
+        else:
+            self.do_status('')
+            message = self.getCommitMessage()
+            if message == False:
+                return
+
+
+        signature = self.createSignature()
+        tree = self.repo.TreeBuilder(self.repo.index.write_tree()).write() # Create commit's associated tree
+        head = self.repo.head
+        self.commit = self.repo.create_commit(head.name, signature, signature, message, tree, [head.target])
+        print(self.printPostCommitInfo(head,self.commit))
+
     def do_status(self, arg):
         """
         GIT_STATUS_CURRENT = 0
