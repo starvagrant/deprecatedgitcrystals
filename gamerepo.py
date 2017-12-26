@@ -30,6 +30,9 @@ class GitCmd(cmd.Cmd):
     def default(self, arg):
         print('I do not understand that command. Type "help" for a list of commands.')
 
+    def createSignature(self):
+            return pygit2.Signature(self.repo.config['user.name'], self.repo.config['user.email'])
+
     def revparse(self, obj):
         err = None
         if obj == 'staged' or obj == 'cached':
@@ -115,7 +118,48 @@ class GitCmd(cmd.Cmd):
                     return False
             return True
 
-    # A very simple "quit" command to terminate the program:
+    def checkCanCommit(self):
+        entries = []
+        status = self.repo.status()
+        for fileName in status.keys():
+            entries.append(self.statusParse(fileName, status[fileName]))
+
+        for entry in entries:
+            if entry['status'].__contains__('Staged File Deletion') or entry['status'].__contains__('Staged File Changes') or entry['status'].__contains__('Staged New File'):
+                return True
+            else:
+                return False
+
+    def getCommitMessage(self):
+        print("Enter One Line Summary of Commit. Blank entry or 'quit' aborts the commit")
+        self.commitHeader = input()
+        if self.commitHeader == "quit" or self.commitHeader == "":
+            print("Type ",S_CYA,"commit",S_WHI,"to commit again\n",
+                        S_CYA,"status ",S_WHI,"to see what you've staged\n",
+                        S_CYA,"diff ",S_WHI,"to changes since your last commit\n",
+                        S_CYA,"stage or unstage ",S_WHI,"to stage or unstage file changes\n",)
+            return False
+        print("Enter more commit info if desired or quit to abort the commit")
+        self.commitBody = input()
+        if self.commitBody == "quit":
+            print("Type ",S_CYA,"commit",S_WHI,"to commit again\n",
+                        S_CYA,"status ",S_WHI,"to see what you've staged\n",
+                        S_CYA,"diff ",S_WHI,"to changes since your last commit\n",
+                        S_CYA,"stage or unstage ",S_WHI,"to stage or unstage file changes\n",)
+            return False
+        if self.commitBody != "":
+            self.commitMessage = self.commitHeader + '\n\n' + self.commitBody
+        else:
+            self.commitMessage = self.commitHeader
+
+        return self.commitMessage
+
+    def printPostCommitInfo(self,head,commit):
+        message = '\n'
+        message += "New Commit " + S_CYA + commit.hex[:8] + S_WHI + " Added to repo\n"
+        message +="Branch " + S_CYA + head.name[11:] + S_WHI + " Updated"
+        return message
+
     def do_quit(self, arg):
         """Quit the game."""
         return True # this exits the Cmd application loop in TextAdventureCmd.cmdloop()

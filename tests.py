@@ -395,6 +395,7 @@ west: [32mWizard's Library[34m
         self.assertEqual(git.statusParse('wtdeleted_staged', 514), {'name': 'wtdeleted_staged', 'status': ['Unstaged File Deletion','Staged File Changes']})
 
     def test_check_dangers(self):
+        self.reset_repo()
         # Test Method on Map Object
         roomsJson = recordable.Recordable('mock-data', 'worldRooms')
         rooms = cavemap.Map(roomsJson)
@@ -475,5 +476,24 @@ west: [32mWizard's Library[34m
         game.do_setemail('invalidurl')  # invalid email
         self.assertEqual(game.repo.config['user.email'], 'yoyoyo@aol.com')
 
+    def test_createSignature(self):
+        """ Test internal createSignature Method """
+        game = gitgame.GitGameCmd('mock-data')
+        signature = game.createSignature()
+        self.assertTrue(isinstance(signature, pygit2.Signature))
+
+    def test_checkCanCommit(self):
+        """ Test User Provided Pre-commit Message """
+        self.reset_repo()
+        game = gitgame.GitGameCmd('mock-data')
+        self.assertFalse(game.checkCanCommit()) # No changes
+        game.do_north('')
+        self.assertFalse(game.checkCanCommit()) # No staged changes
+        game.do_stage('location.json')
+        self.assertTrue(game.checkCanCommit())
+
+        # Note: writing this test involves both provided command line input
+        # And doing a git reset on the tested repo.
+        a = "No Test"
 
 unittest.main()
